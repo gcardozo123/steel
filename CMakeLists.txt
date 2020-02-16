@@ -1,42 +1,39 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
+cmake_minimum_required(VERSION 3.1)
+
+if(${CMAKE_VERSION} VERSION_LESS 3.15)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+    cmake_policy(VERSION 3.15)
+endif()
 
 # issue [https://gitlab.kitware.com/cmake/cmake/issues/19409] does not allow to do this:
 #set(CMAKE_GENERATOR_PLATFORM "Visual Studio 15 2017 Win64")
 # it's necessary to run with: cmake -G "Visual Studio 15 2017 Win64" ..
-
-project(steel)
-
-list(APPEND CMAKE_PREFIX_PATH $ENV{CONDA_PREFIX}/Library/lib)
-list(APPEND CMAKE_PREFIX_PATH $ENV{CONDA_PREFIX}/Library/include)
-list(APPEND CMAKE_PREFIX_PATH ${PROJECT_SOURCE_DIR}/source/cpp/include)
-
-message(STATUS ">>>> CMake search paths: ${CMAKE_PREFIX_PATH}")
-
-find_path(
-	SDL2_INCLUDE_DIR
-	SDL.h
-    PATH_SUFFIXES SDL2
-)
-find_library(
-	SDL2_LIBRARY
-	NAMES SDL2
-    PATH_SUFFIXES lib64 lib lib/x64
+project(steel 
+	DESCRIPTION "one day this will be a 2D game framework"
+	VERSION 0.0.1
+	LANGUAGES CXX
 )
 
-message(STATUS ">>>> SDL2_INCLUDE_DIR: ${SDL2_INCLUDE_DIR}")
-message(STATUS ">>>> SDL2_LIBRARY: ${SDL2_LIBRARY}")
+if (${CMAKE_SIZEOF_VOID_P} EQUAL "8")
+    set(STEEL_ARCHITECTURE "x64")
+else()
+    set(STEEL_ARCHITECTURE "x86")
+endif ()
 
-file(GLOB_RECURSE SOURCE_FILES "source/cpp/*.cpp")
+if (MSVC)                                                        
+    if (NOT CMAKE_CL_64 AND NOT ${STEEL_ARCHITECTURE} EQUAL "x64")
+		message(FATAL_ERROR "\nError: Steel only supports Microsoft Visual Studio x64 for now.\n")
+	endif()
+endif ()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+# Make steel the Visual Studio Startup Project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
-target_sources(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source/cpp/main.cpp)
 
-message(STATUS ">>>> CMake executables: ${SOURCE_FILES}")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
+list(APPEND CMAKE_MODULE_PATH $ENV{CONDA_PREFIX}/Library/lib/cmake/Catch2)
+string(REPLACE "\\" "/" CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}")
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${SDL2_LIBRARY})
-set_target_properties(
-	${PROJECT_NAME} PROPERTIES
-	LINK_FLAGS /SUBSYSTEM:CONSOLE
-)
+add_subdirectory(steel/src)
+add_subdirectory(steel_tests)
