@@ -27,8 +27,14 @@ if (MSVC)
 	endif()
 endif ()
 
-# Make steel the Visual Studio Startup Project
+# Make Steel the Visual Studio Startup Project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+
+# Support folders in IDE's
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# Enable Steel macros:
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSTEEL_DEBUG -DSTEEL_ENABLE_LOG")
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)

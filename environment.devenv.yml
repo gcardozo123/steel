@@ -12,6 +12,7 @@ dependencies:
   - sdl2_mixer==2.0.1
   - sdl2_ttf==2.0.15
   - catch2==2.11.0
+  - spdlog==1.2.1
   
 
 environment:
