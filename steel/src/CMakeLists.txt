@@ -25,6 +25,13 @@ set(SOURCE_FILES
 	game_info.cpp
 	log.cpp
 	renderer.cpp
+	actor/actor.cpp
+	actor/actor_component.cpp
+	actor/id_provider.cpp
+	actor/id_provider.cpp
+	actor/transform.cpp
+	actor/texture.cpp
+	math/vector2.cpp
 )
 
 set(HEADER_LIST 
@@ -35,6 +42,12 @@ set(HEADER_LIST
 	"${STEEL_INCLUDE_DIR}game_info.hpp"
 	"${STEEL_INCLUDE_DIR}log.hpp"
 	"${STEEL_INCLUDE_DIR}renderer.hpp"
+	"${STEEL_INCLUDE_DIR}actor.hpp"
+	"${STEEL_INCLUDE_DIR}actor_component.hpp"
+	"${STEEL_INCLUDE_DIR}id_provider.hpp"
+	"${STEEL_INCLUDE_DIR}transform.hpp"
+	"${STEEL_INCLUDE_DIR}texture.hpp"
+	"${STEEL_INCLUDE_DIR}vector2.hpp"
 )
 
 # Build Steel as a library 

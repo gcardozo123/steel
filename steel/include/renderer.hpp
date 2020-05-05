@@ -32,5 +32,7 @@ namespace Steel
 		double GetDesiredFps();
 		double GetTimeScale();
 
+		void Render();
+
 	};
 }

@@ -4,6 +4,10 @@ set(UNIT_TEST_SOURCE_LIST
   test_renderer.cpp
   test_game.cpp
   test_log.cpp
+  test_actor.cpp
+  test_actor_component.cpp
+  test_vector2.cpp
+  test_transform.cpp
 )
 
 set(TARGET_NAME tests)

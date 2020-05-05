@@ -188,6 +188,7 @@ namespace Steel
 						frame_accumulator -= desired_frametime;
 					}
 				}
+				renderer.get()->Render();
 				//game.render(1.0);
 				//display(); //swap buffers
 			}

@@ -93,4 +93,17 @@ namespace Steel
 	{
 		return time_scale;
 	}
+	
+	void Renderer::Render()
+	{
+		//set background color:
+		SDL_SetRenderDrawColor(renderer.get(), 50, 50, 80, 255);
+		//clear back buffer:
+		SDL_RenderClear(renderer.get());
+		//todo: draw game objects
+
+		//swap front and back buffers:
+		SDL_RenderPresent(renderer.get());
+
+	}
 }
