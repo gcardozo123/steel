@@ -4,7 +4,9 @@
 namespace Steel
 {
 	Game::Game()
-		: engine(nullptr)
+		: 
+        engine(CreateUniquePtr<Engine>()),
+        game_info(CreateSharedPtr<GameInfo>())
 	{
 	}
 	Game::~Game()
@@ -13,8 +15,14 @@ namespace Steel
 	
 	void Game::Start(std::string window_title, int window_width, int window_height, bool is_window_resizable)
 	{
-		engine = CreateUniquePtr<Engine>();
-		engine->Start(window_title, window_width, window_height, is_window_resizable);
+        this->game_info->SetDesiredFps(60.0f);
+        this->game_info->SetWindowWidth(window_width);
+        this->game_info->SetWindowHeight(window_height);
+        this->game_info->SetWindowResizable(is_window_resizable);
+        this->game_info->SetWindowTitle(window_title);
+        this->game_info->SetTimeScale(1.0);
+        
+        engine->Start(this->game_info);
 	}
 	
 	void Game::Quit()

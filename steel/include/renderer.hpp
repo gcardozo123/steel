@@ -4,6 +4,7 @@
 #include <string>
 
 #include "core.hpp"
+#include "game_info.hpp"
 
 namespace Steel 
 {
@@ -13,13 +14,12 @@ namespace Steel
 		std::unique_ptr<SDL_Window, void(*)(SDL_Window*)> window;
 		std::unique_ptr<SDL_Renderer, void(*)(SDL_Renderer*)> renderer;
 
-		double desired_fps;
-		double time_scale;
+        SharedPtr<GameInfo> game_info;
 
 	public:
 		Renderer();
 
-		void Initialize(std::string window_title, int window_width, int window_height, bool is_window_resizable);
+		void Initialize(SharedPtr<GameInfo> game_info);
 		
 		std::string GetWindowTitle();
 

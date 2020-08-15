@@ -18,6 +18,8 @@ namespace Steel
 	protected:
 		ActorId actor_id;
 		ActorComponents actor_components;
+		
+		//TODO: StrongActorComponentPtr transform;
 
 	public:
 		

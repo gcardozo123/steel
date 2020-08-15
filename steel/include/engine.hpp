@@ -21,7 +21,7 @@ namespace Steel
 	public:
 		Engine();
 		
-		void Start(std::string window_title, int window_width, int window_height, bool is_window_resizable);
+		void Start(SharedPtr<GameInfo> game_info);
 		void Stop();
 		
 	private:

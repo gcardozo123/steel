@@ -8,16 +8,17 @@ namespace Steel
 	Engine::Engine()
 		: 
 		is_running(false), 
-		game_info(CreateSharedPtr<GameInfo>()),
+		game_info(nullptr),
 		renderer(CreateSharedPtr<Renderer>())
 	{
 		if (!Log::GetCoreLogger())
 			Log::Init();
 	}
 
-	void Engine::Start(std::string window_title, int window_width, int window_height, bool is_window_resizable)
+	void Engine::Start(SharedPtr<GameInfo> game_info)
 	{
-		renderer->Initialize(window_title, window_width, window_height, is_window_resizable);
+        this->game_info = game_info;
+        renderer->Initialize(game_info);
 		is_running = true;
 		RunMainLoop();
 	}

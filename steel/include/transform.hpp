@@ -12,6 +12,8 @@ namespace Steel
 		Vector2 scale;
 		Vector2 size;			//current size
 		Vector2 original_size;	//size of the texture on the file system
+		Vector2 pivot;			// (0, 0) = top left, (1, 1) = bottom right
+		//TODO: Transform parent;
 		double rotation;
 
 		void _SetSize(double width, double height);
@@ -23,7 +25,8 @@ namespace Steel
 			: 
 			ActorComponent(owner, ActorComponentId(typeid(this))),
 			scale(1.0, 1.0),
-			rotation(0.0)
+			rotation(0.0),
+			pivot(0.5, 0.5)
 		{}
 		
 		Vector2 GetPosition() { return position; }

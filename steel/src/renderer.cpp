@@ -4,18 +4,17 @@
 
 namespace Steel
 {
-	Renderer::Renderer()
-		:
-		window(nullptr, SDL_DestroyWindow),
-		renderer(nullptr, SDL_DestroyRenderer),
-		desired_fps(60),
-		time_scale(1.00f)
-	{
-	}
+    Renderer::Renderer()
+        :
+        window(nullptr, SDL_DestroyWindow),
+        renderer(nullptr, SDL_DestroyRenderer),
+        game_info(CreateSharedPtr<GameInfo>())
+    {}
 
-	void Renderer::Initialize(std::string window_title, int window_width, int window_height, bool is_window_resizable)
+	void Renderer::Initialize(SharedPtr<GameInfo> game_info)
 	{
-		if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+        this->game_info = game_info;
+        if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
 		{
 			std::cerr << "Error initializing SDL." << std::endl;
 			return; //TODO: consider throw exception
@@ -25,14 +24,17 @@ namespace Steel
 			std::cerr << "Error initializing SDL TTF" << std::endl;
 			return;
 		}
-		Uint32 sdlFlags = is_window_resizable ? SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE : SDL_WINDOW_SHOWN;
+		Uint32 sdlFlags = (
+            game_info->IsWindowResizable() ? 
+            SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE : SDL_WINDOW_SHOWN
+        );
 		window.reset(
 			SDL_CreateWindow(
-				window_title.c_str(),
+				game_info->GetWindowTitle().c_str(),
 				SDL_WINDOWPOS_CENTERED,
 				SDL_WINDOWPOS_CENTERED,
-				window_width,
-				window_height,
+				game_info->GetWindowWidth(),
+                game_info->GetWindowHeight(),
 				sdlFlags
 			)
 		);
@@ -66,7 +68,8 @@ namespace Steel
 
 	void Renderer::SetWindowWidth(int value)
 	{
-		SDL_SetWindowSize(window.get(), value, GetWindowHeight());
+        game_info->SetWindowWidth(value);
+        SDL_SetWindowSize(window.get(), value, GetWindowHeight());
 	}
 
 	int Renderer::GetWindowHeight()
@@ -81,17 +84,18 @@ namespace Steel
 
 	void Renderer::SetWindowHeight(int value)
 	{
-		SDL_SetWindowSize(window.get(), GetWindowWidth(), value);
+        game_info->SetWindowHeight(value);
+        SDL_SetWindowSize(window.get(), GetWindowWidth(), value);
 	}
 
 	double Renderer::GetDesiredFps()
 	{
-		return desired_fps;
+		return game_info->GetDesiredFps();
 	}
 	
 	double Renderer::GetTimeScale()
 	{
-		return time_scale;
+		return game_info->GetTimeScale();
 	}
 	
 	void Renderer::Render()

@@ -11,6 +11,7 @@ namespace Steel
 	{
 	private:
 		UniquePtr<Engine> engine;
+        SharedPtr<GameInfo> game_info;
 
 	public:
 		Game();

@@ -36,7 +36,7 @@ TEST_CASE("test_actor", "")
 	actor->Init();
 	actor->PostInit();
 	actor->Update(0.1666f);
-	// it doesn't have an ComponentA, so it should return an expired weak_ptr:
+	// it doesn't have a ComponentA, so it should return an expired weak_ptr:
 	REQUIRE(actor->GetComponent<ComponentA>().expired());
 
 	// let's make sure that the component's pointer destruction won't destroy the actor as well
