@@ -5,3 +5,5 @@ cd /d "%~dp0\..\build"
 call cmake -G "Visual Studio 15 2017 Win64" .. || goto: eof
 call cmake --build . || goto: eof
 cd /d "%_OLD_CD%"
+mkdir "build\steel_tests\game_assets"
+robocopy "steel_tests\game_assets" "build\steel_tests\game_assets" /s /e

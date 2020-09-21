@@ -29,8 +29,8 @@ public:
 
 TEST_CASE("test_actor", "") 
 {
-	for(int i = 0; i < 10; i++)
-		REQUIRE(IdProvider::New() == i + 1);
+	/*for(int i = 0; i < 10; i++)
+		REQUIRE(IdProvider::New() == i + 1);*/
 
 	StrongActorPtr actor = CreateSharedPtr<Actor>();
 	actor->Init();
