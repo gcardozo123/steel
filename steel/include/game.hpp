@@ -3,24 +3,13 @@
 #include <string>
 
 #include "core.hpp"
-#include "engine.hpp"
-#include "assets_container.hpp"
-#include "actor_manager.hpp"
+
 
 namespace Steel
 {
 
 class Game
 {
-
-private:
-	UniquePtr<Engine> engine;
-    SharedPtr<GameInfo> game_info;
-
-public:
-    SharedPtr<AssetsContainer> assets;
-    SharedPtr<ActorManager> actors;
-    //SharedPtr<Scene> scene;
 
 public:
 	Game();
