@@ -20,21 +20,43 @@ set(STEEL_INCLUDE_DIR "../include/")
 string(REPLACE "\\" "/" STEEL_INCLUDE_DIR "${STEEL_INCLUDE_DIR}")
 
 set(SOURCE_FILES
+	actor/actor.cpp
+	actor/actor_component.cpp
+	actor/actor_manager.cpp
+	actor/id_provider.cpp
+	actor/id_provider.cpp
+	actor/texture_component.cpp
+	actor/transform.cpp
+	assets_container.cpp
 	engine.cpp
 	game.cpp
 	game_info.cpp
 	log.cpp
+	math/vector2.cpp
 	renderer.cpp
+	scene.cpp
+	texture_asset.cpp
 )
 
 set(HEADER_LIST 
-	"${STEEL_INCLUDE_DIR}steel.hpp"
+	"${STEEL_INCLUDE_DIR}actor.hpp"
+	"${STEEL_INCLUDE_DIR}actor_component.hpp"
+	"${STEEL_INCLUDE_DIR}actor_manager.hpp"
+	"${STEEL_INCLUDE_DIR}assets_container.hpp"
 	"${STEEL_INCLUDE_DIR}core.hpp"
 	"${STEEL_INCLUDE_DIR}engine.hpp"
 	"${STEEL_INCLUDE_DIR}game.hpp"
 	"${STEEL_INCLUDE_DIR}game_info.hpp"
+	"${STEEL_INCLUDE_DIR}id_provider.hpp"
 	"${STEEL_INCLUDE_DIR}log.hpp"
 	"${STEEL_INCLUDE_DIR}renderer.hpp"
+	"${STEEL_INCLUDE_DIR}scene.hpp"
+	"${STEEL_INCLUDE_DIR}steel.hpp"
+	"${STEEL_INCLUDE_DIR}steel_sdl.hpp"
+	"${STEEL_INCLUDE_DIR}texture_asset.hpp"
+	"${STEEL_INCLUDE_DIR}texture_component.hpp"
+	"${STEEL_INCLUDE_DIR}transform.hpp"
+	"${STEEL_INCLUDE_DIR}vector2.hpp"
 )
 
 # Build Steel as a library 
