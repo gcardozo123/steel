@@ -5,7 +5,7 @@ namespace Steel
 
 TextureComponent::TextureComponent(StrongActorPtr owner)
     :
-    ActorComponent(owner, ActorComponentId(typeid(this))),
+    ActorComponent(ActorComponentId(typeid(this)), owner),
     texture_asset(nullptr)
 {}
 

@@ -6,24 +6,24 @@ using namespace Steel;
 class ComponentA : public ActorComponent
 {
 public:
-	ComponentA(StrongActorPtr owner)
-		: ActorComponent(owner, ActorComponentId(typeid(this)))
+	ComponentA(WeakActorPtr owner= WeakActorPtr())
+		: ActorComponent(ActorComponentId(typeid(this)), owner)
 	{}
 };
 
 class ComponentB : public ActorComponent
 {
 public:
-	ComponentB(StrongActorPtr owner)
-		: ActorComponent(owner, ActorComponentId(typeid(this)))
+	ComponentB(WeakActorPtr owner= WeakActorPtr())
+		: ActorComponent(ActorComponentId(typeid(this)), owner)
 	{}
 };
 
 class ComponentC : public ActorComponent
 {
 public:
-	ComponentC(StrongActorPtr owner)
-		: ActorComponent(owner, ActorComponentId(typeid(this)))
+	ComponentC(WeakActorPtr owner= WeakActorPtr())
+		: ActorComponent(ActorComponentId(typeid(this)), owner)
 	{}
 };
 
@@ -47,7 +47,7 @@ TEST_CASE("test_actor", "")
 	}
 	REQUIRE(actor->HasComponent<ComponentA>());
 	REQUIRE(!actor->GetComponent<ComponentA>().expired());
-	auto a_owner = actor->GetComponent<ComponentA>().lock()->GetOwner();
+	auto a_owner = actor->GetComponent<ComponentA>().lock()->GetOwner().lock();
 	REQUIRE(a_owner != nullptr);
 	REQUIRE(a_owner == actor);
 

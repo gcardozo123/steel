@@ -5,7 +5,7 @@ using namespace Steel;
 TEST_CASE("test_transform", "") 
 {
 	StrongActorPtr actor = CreateSharedPtr<Actor>();
-	Transform t(actor); 
+	Transform t(actor);
 	
 	Vector2 position = t.GetPosition();
 	REQUIRE(position.x == 0.0);

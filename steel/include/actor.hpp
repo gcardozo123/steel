@@ -6,6 +6,7 @@
 #include "core.hpp"
 #include "id_provider.hpp"
 #include "actor_component.hpp"
+#include "transform.hpp"
 
 namespace Steel
 {
@@ -13,20 +14,23 @@ namespace Steel
 using ActorId = unsigned int;
 using ActorComponents = std::unordered_map<ActorComponentId, StrongActorComponentPtr>;
 	
-class Actor
+class Actor : public std::enable_shared_from_this<Actor>
 {
 private:
 protected:
 	ActorId actor_id;
 	ActorComponents actor_components;
-		
-	//TODO: StrongActorComponentPtr transform;
-
+    
 public:
-		
-	Actor() { actor_id = IdProvider::New(); }
-		
-	virtual void Init() {}
+    
+    Actor()
+    { 
+        actor_id = IdProvider::New(); 
+        // all actors come with a transform component:
+        this->AddComponent(CreateSharedPtr<Transform>());
+    }
+
+    virtual void Init() {}
 	virtual void PostInit() {}
 	virtual void Update(float delta_time) {}
 	virtual void Destroy() {}

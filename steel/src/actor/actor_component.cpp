@@ -3,7 +3,7 @@
 
 namespace Steel
 {
-	void ActorComponent::SetOwner(StrongActorPtr owner)
+	void ActorComponent::SetOwner(WeakActorPtr owner)
 	{
 		this->owner = owner;
 	}

@@ -21,9 +21,9 @@ namespace Steel
 		void _SetScale(double x, double y);
 
 	public:
-		Transform(StrongActorPtr owner)
+		Transform(WeakActorPtr owner=WeakActorPtr())
 			: 
-			ActorComponent(owner, ActorComponentId(typeid(this))),
+			ActorComponent(ActorComponentId(typeid(this)), owner),
 			scale(1.0, 1.0),
 			rotation(0.0),
 			pivot(0.5, 0.5)

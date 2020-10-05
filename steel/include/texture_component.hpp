@@ -14,7 +14,7 @@ private:
 
 
 public:
-    TextureComponent(StrongActorPtr owner);
+    TextureComponent(StrongActorPtr owner=nullptr);
 
     SharedPtr<TextureAsset> GetTextureAsset();
     void SetTextureAsset(SharedPtr<TextureAsset> texture_asset);

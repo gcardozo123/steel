@@ -127,6 +127,7 @@ void Renderer::Render()
             {
                 int w, h;
                 SDL_QueryTexture(sdl_texture.get(), NULL, NULL, &w, &h);
+                //TODO fill destination rectangle with actor->GetTransform() data
                 SDL_Rect rect;
                 rect.w = w;
                 rect.h = h;
