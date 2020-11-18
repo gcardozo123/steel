@@ -23,15 +23,20 @@ set(FLECS_DIR "../../third_party/flecs/")
 string(REPLACE "\\" "/" FLECS_DIR "${FLECS_DIR}")
 
 set(SOURCE_FILES
+	assets.cpp
 	game.cpp
+	game_info.cpp
 	log.cpp
 	math/vector2.cpp
 	"${FLECS_DIR}flecs.c"
 )
 
 set(HEADER_LIST 
+	"${STEEL_INCLUDE_DIR}assets.hpp"
+	"${STEEL_INCLUDE_DIR}components.hpp"
 	"${STEEL_INCLUDE_DIR}core.hpp"
 	"${STEEL_INCLUDE_DIR}game.hpp"
+	"${STEEL_INCLUDE_DIR}game_info.hpp"
 	"${STEEL_INCLUDE_DIR}log.hpp"
 	"${STEEL_INCLUDE_DIR}steel.hpp"
 	"${STEEL_INCLUDE_DIR}steel_sdl.hpp"
