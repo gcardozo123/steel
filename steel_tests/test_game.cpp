@@ -14,7 +14,8 @@ TEST_CASE("test_game", "[test_game]")
     Game game;
     game.Init("Potato game", 1280, 720, true);
 
-    auto texture_component = game.GetAssets().LoadTexture(std::string("game_assets/ghost1.png"));
+    std::string filename = "game_assets/ghost1.png";
+    auto texture_component = game.GetAssets().LoadTexture(filename);
     auto world = game.GetWorld();
     
     // Create entities:

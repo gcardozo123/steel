@@ -7,8 +7,8 @@ else()
 endif()
 
 # issue [https://gitlab.kitware.com/cmake/cmake/issues/19409] does not allow to do this:
-#set(CMAKE_GENERATOR_PLATFORM "Visual Studio 15 2017 Win64")
-# it's necessary to run with: cmake -G "Visual Studio 15 2017 Win64" ..
+#set(CMAKE_GENERATOR_PLATFORM "Visual Studio 16 2019")
+# it's necessary to run with: cmake -G "Visual Studio 16 2019"
 project(steel 
 	DESCRIPTION "one day this will be a 2D game framework"
 	VERSION 0.0.1
@@ -21,11 +21,11 @@ else()
     set(STEEL_ARCHITECTURE "x86")
 endif ()
 
-if (MSVC)                                                        
-    if (NOT CMAKE_CL_64 AND NOT ${STEEL_ARCHITECTURE} EQUAL "x64")
-		message(FATAL_ERROR "\nError: Steel only supports Microsoft Visual Studio x64 for now.\n")
-	endif()
-endif ()
+#if (MSVC)
+#    if (NOT CMAKE_CL_64 AND NOT ${STEEL_ARCHITECTURE} EQUAL "x64")
+#		message(FATAL_ERROR "\nError: Steel only supports Microsoft Visual Studio x64 for now.\n")
+#	endif()
+#endif ()
 
 # Make Steel the Visual Studio Startup Project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})

@@ -46,17 +46,17 @@ void Game::_InitializeRenderer()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
-        std::cerr << "Error initializing SDL." << std::endl;
+        STEEL_CORE_ASSERT(false, "Error initializing SDL.");
         SDL_Quit();
         return;
     }
     if (TTF_Init() != 0)
     {
-        std::cerr << "Error initializing SDL TTF" << std::endl;
+        STEEL_CORE_ASSERT(false, "Error initializing SDL TTF");
         SDL_Quit();
         return;
     }
-    Uint32 sdlFlags = (
+    Uint32 sdl_flags = (
         game_info->IsWindowResizable() ?
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE : SDL_WINDOW_SHOWN
         );
@@ -67,12 +67,12 @@ void Game::_InitializeRenderer()
             SDL_WINDOWPOS_CENTERED,
             game_info->GetWindowWidth(),
             game_info->GetWindowHeight(),
-            sdlFlags
+            sdl_flags
         )
     );
     if (!window)
     {
-        std::cerr << "Error creating SDL window." << std::endl;
+        STEEL_CORE_ASSERT(false, "Error creating SDL window.");
         SDL_Quit();
         return;
     }
@@ -81,7 +81,7 @@ void Game::_InitializeRenderer()
     );
     if (!renderer)
     {
-        std::cerr << "Error creating SDL renderer." << std::endl;
+        STEEL_CORE_ASSERT(false, "Error creating SDL renderer.");
         SDL_Quit();
         return;
     }
@@ -131,10 +131,9 @@ void Game::Run()
     while (this->is_running) 
     {
         _ProcessInput();
-        //TODO: process system events
-        //TODO: update actors
-        this->_Render();
+        //TODO: process Windows events
         this->world->progress();
+        this->_Render();
     }
 }
 
@@ -176,7 +175,6 @@ void Game::_Render()
         }
 
     });
-
 
     //swap front and back buffers:
     SDL_RenderPresent(this->renderer.get());

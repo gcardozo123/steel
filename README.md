@@ -15,10 +15,15 @@ Similarities are not coincidences, I've been taking a lot of inspiration from:
 
 ## Building the environment
 
-This project contains submodules, after cloning it, run:
+This project contains submodules, either clone it using
+```bash
+git clone --recurse-submodules <repository_link>
+```
+or, after cloning it, run:
 ```bash
 git submodule update --init --recursive
 ```
+and make sure that submodules under `cmake` and `third_party` were properly cloned.
 
 This project uses [Miniconda](https://docs.conda.io/en/latest/miniconda.html) as a package manager
 and [conda devenv](https://github.com/ESSS/conda-devenv). After installing `Miniconda` you need

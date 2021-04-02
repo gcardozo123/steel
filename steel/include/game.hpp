@@ -14,6 +14,16 @@ namespace Steel
 
 class Game
 {
+public:
+    Game();
+    virtual ~Game();
+
+    void Init(std::string window_title, int window_width, int window_height, bool is_window_resizable);
+    void Run();
+    void Quit();
+
+    SharedPtr<flecs::world> GetWorld();
+    Assets& GetAssets() { return assets; }
 
 private:
     SharedPtr<flecs::world> world;
@@ -30,22 +40,6 @@ private:
     void _RegisterComponents();
     void _ProcessInput();
     void _Render();
-
-public:
-	Game();
-	virtual ~Game();
-
-	void Init(std::string window_title, int window_width, int window_height, bool is_window_resizable);
-    void Run();
-    void Quit();
-    
-    SharedPtr<flecs::world> GetWorld();
-    Assets& GetAssets() { return assets; }
-    
-
-
-
-
 };
 
 }
