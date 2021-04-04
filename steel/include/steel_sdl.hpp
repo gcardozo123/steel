@@ -4,6 +4,8 @@
 
 #include<SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
+
 
 namespace Steel 
 {	
@@ -18,12 +20,6 @@ namespace Steel
         return std::shared_ptr<T>(t, [](T *t) { SdlDeleteResource(t); });
     }
     
-    template <typename T>
-    std::unique_ptr<T> SdlUniquePtr(T *t)
-    {
-        return std::unique_ptr<T>(t, [](T *t) { SdlDeleteResource(t); });
-    }
-
     struct SteelSdlWindowDestroyer
     {
         void operator()(SDL_Window* w) const

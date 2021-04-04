@@ -3,8 +3,6 @@ name: steel
 dependencies:
   - conda-wrappers
   - python==3.8
-  - pybind11==2.4.3
-  - pytest==5.3.5
   - cmake==3.16.3
   - sdl2==2.0.10
   - sdl2_gfx==1.0.4

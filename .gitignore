@@ -34,3 +34,6 @@
 .vs
 build/
 environment.yml
+
+cmake-build-debug/
+Steel.log

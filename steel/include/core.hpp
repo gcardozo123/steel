@@ -15,17 +15,7 @@
 #endif
 
 namespace Steel 
-{	
-	static const long double PI = 3.141592653589793238462643383279502884L;
-	
-	class Actor;
-	class ActorComponent;
-	
-	using StrongActorPtr = std::shared_ptr<Actor>;
-	using WeakActorPtr = std::weak_ptr<Actor>;
-	using StrongActorComponentPtr = std::shared_ptr<ActorComponent>;
-	using WeakActorComponentPtr = std::weak_ptr<ActorComponent>;
-
+{
 	template<typename T>
 	using UniquePtr = std::unique_ptr<T>;
 	template<typename T, typename ... Args>

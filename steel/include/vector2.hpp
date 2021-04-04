@@ -1,158 +1,236 @@
 #pragma once
 
-#include <cmath>
+#include <iostream>
 
 #include "core.hpp"
+#include "steel_math.hpp"
 
 namespace Steel
 {
-	class Vector2
+namespace Math
+{
+    class Vector2
 	{
-	private:
-	
 	public:
-		union { double x; double width; };
-		union { double y; double height; };
+		union { float x; float width; };
+		union { float y; float height; };
 		
 		Vector2() : x(0.0), y(0.0){}
-		Vector2(double x, double y) : x(x), y(y){}
+		~Vector2() = default;
+		Vector2(float x, float y) : x(x), y(y){}
 		Vector2(const Vector2& v) : x(v.x), y(v.y) {}
+        Vector2& operator=(const Vector2& v)
+        {
+            x = v.x;
+            y = v.y;
+            return *this;
+        }
 
-		Vector2 Copy();
-		Vector2 Up();
-		Vector2 Down();
-		Vector2 Left();
-		Vector2 Right();
-		Vector2 Zero();
+        friend std::ostream& operator<<(std::ostream& os, Vector2 v)
+        {
+            os << "(" << v.x << ", " << v.y << ")";
+            return os;
+        }
 
-		Vector2 operator+(Vector2& v) 
+		Vector2 Copy() const
+        {
+            return Vector2(x, y);
+        }
+
+        static Vector2 Up()
+        {
+            return Vector2(0.0, 1.0);
+        }
+
+        static Vector2 Down()
+        {
+            return Vector2(0.0, -1.0);
+        }
+
+        static Vector2 Left()
+        {
+            return Vector2(-1.0, 0.0);
+        }
+
+        static Vector2 Right()
+        {
+            return Vector2(1.0, 0.0);
+        }
+
+        static Vector2 Zero()
+        {
+            return Vector2();
+        }
+
+        static Vector2 Unity()
+        {
+            return Vector2(1.0, 1.0);
+        }
+
+        bool operator==(const Vector2& v) const
+        {
+		    return x == v.x && y == v.y;
+        }
+
+        Vector2 operator+(const Vector2& v) const
 		{
 			return Vector2(x + v.x, y + v.y);
 		}
-		
-		Vector2 operator-(Vector2& v) 
-		{
-			return Vector2(x - v.x, y - v.y);
-		}
 
-		Vector2& operator+=(Vector2& v) 
+		Vector2& operator+=(const Vector2& v)
 		{
 			x += v.x;
 			y += v.y;
 			return *this;
 		}
 
-		Vector2& operator-=(Vector2& v) 
+        Vector2 operator-(const Vector2& v) const
+        {
+            return Vector2(x - v.x, y - v.y);
+        }
+
+        Vector2 operator-() const
+        {
+            return Vector2(-x, -y);
+        }
+
+		Vector2& operator-=(const Vector2& v)
 		{
 			x -= v.x;
 			y -= v.y;
 			return *this;
 		}
 
-		Vector2 operator+(double s) 
+		Vector2 operator*(float v) const
 		{
-			return Vector2(x + s, y + s);
+            return Vector2(x * v, y * v);
 		}
 
-		Vector2 operator-(double s) 
+        Vector2& operator*=(float v)
+        {
+            x *= v;
+            y *= v;
+            return *this;
+        }
+		
+		Vector2 operator/(float v) const
 		{
-			return Vector2(x - s, y - s);
-		}
-
-		Vector2 operator*(double s) 
-		{
-			return Vector2(x * s, y * s);
+            return Vector2(x / v, y / v);
 		}
 		
-		Vector2 operator/(double s) 
+		Vector2& operator/=(float v)
 		{
-			return Vector2(x / s, y / s);
-		}
-
-		Vector2& operator+=(double s) 
-		{
-			x += s;
-			y += s;
-			return *this;
-		}
-		Vector2& operator-=(double s) 
-		{
-			x -= s;
-			y -= s;
-			return *this;
-		}
-		
-		Vector2& operator*=(double s) 
-		{
-			x *= s;
-			y *= s;
-			return *this;
-		}
-		
-		Vector2& operator/=(double s) 
-		{
-			x /= s;
-			y /= s;
+			x /= v;
+			y /= v;
 			return *this;
 		}
 
-		void Set(double x, double y) 
+		void Set(float x, float y)
 		{
 			this->x = x;
 			this->y = y;
 		}
 
-		void Rotate(double deg) 
+		Vector2 Rotated(float deg) const
 		{
-			double theta = deg / 180.0 * PI;
-			double c = cos(theta);
-			double s = sin(theta);
-			double tx = x * c - y * s;
-			double ty = x * s + y * c;
-			x = tx;
-			y = ty;
+		    float theta = ( deg / 180.0f ) * Math::Pi;
+			float c = cos(theta);
+			float s = sin(theta);
+			float tx = x * c - y * s;
+			float ty = x * s + y * c;
+			return Vector2(tx, ty);
 		}
 
-		Vector2& Normalize() 
+		void Rotate(float deg)
+        {
+		    *this = Rotated(deg);
+        }
+
+		Vector2 Normalized() const
+        {
+            Vector2 res = this->Copy();
+		    if (Length() == 0)
+            {
+                return res;
+            }
+            return res * (1.0f / Length());
+        }
+
+        void Normalize()
 		{
-			//TODO review this:
-			if (Length() == 0) 
-				return *this;
-			
-			*this *= (1.0 / Length());
-			return *this;
+			*this = Normalized();
 		}
 
-		float Dist(Vector2 v) const 
+		static float Distance(const Vector2& a, const Vector2& b)
 		{
-			Vector2 d(v.x - x, v.y - y);
-			return d.Length();
+            float v1 = a.x - b.x, v2 = a.y - b.y;
+            return Math::Sqrt(v1 * v1 + v2 * v2);
 		}
 
-		float Length() const 
+        static float DistanceSquared(Vector2 a, Vector2 b)
+        {
+            float v1 = a.x - b.x, v2 = a.y - b.y;
+            return (v1 * v1) + (v2 * v2);
+        }
+
+		float Length() const
 		{
-			return std::sqrt(x * x + y * y);
+			return Math::Sqrt(x * x + y * y);
 		}
-		
-		void Truncate(double length) 
+
+        float LengthSquared() const
+        {
+            return (x * x) + (y * y);
+        }
+
+        /// Divides the components of a "Vector2" by the components of another "Vector2".
+		static Vector2 Divide(Vector2 a, Vector2 b)
+        {
+            a.x /= b.x;
+            a.y /= b.y;
+            return a;
+        }
+
+        static float Dot(Vector2 v1, Vector2 v2)
+        {
+            return v1.x * v2.x + v1.y * v2.y;
+        }
+
+        // Computes the z-component of 2 vectors lying on the xy-plane:
+        static float Cross(Vector2 v1, Vector2 v2)
+        {
+            return (v1.x * v2.y) - (v1.y * v2.x);
+        }
+
+        Vector2 Floor() const
+        {
+		    return Vector2(Math::Floor(x), Math::Floor(y));
+        }
+
+        Vector2 Ceiling() const
+        {
+            return Vector2(Math::Ceiling(x), Math::Ceiling(y));
+        }
+
+		void Truncate(float length)
 		{
-			double angle = atan2f(y, x);
+			float angle = atan2f(y, x);
 			x = length * cos(angle);
 			y = length * sin(angle);
 		}
 
-		Vector2 Ortho() const {
-			return Vector2(y, -x);
-		}
+        // Returns a "Vector2" that is perpendicular towards the clockwise direction
+		Vector2 PerpendicularClockwise() const
+        {
+            return Vector2(y, -x);
+        }
 
-		static float Dot(Vector2 v1, Vector2 v2) 
-		{
-			return v1.x * v2.x + v1.y * v2.y;
-		}
-		
-		static float Cross(Vector2 v1, Vector2 v2) 
-		{
-			return (v1.x * v2.y) - (v1.y * v2.x);
-		}
-	};
-}
+        // Returns a "Vector2" that is perpendicular towards the counter-clockwise direction
+        Vector2 PerpendicularCounterClockwise() const
+        {
+            return Vector2(-y, x);
+        }
+
+	}; //Vector2
+} //Math
+} //Steel
