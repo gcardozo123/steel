@@ -12,7 +12,8 @@ using namespace Steel;
 TEST_CASE("test_game", "[test_game]")
 {
     Game game;
-    game.Init("Potato game", 1280, 720, true);
+    float window_width = 1280, window_height = 720;
+    game.Init("Potato game", window_width, window_height, true);
 
     std::string filename = "game_assets/ghost1.png";
     auto texture_component = game.GetAssets().LoadTexture(filename);
@@ -24,9 +25,11 @@ TEST_CASE("test_game", "[test_game]")
         .set<TransformComponent>(TransformComponent());
 
     auto other_transform = TransformComponent();
-    other_transform.position.Set(200.0, 200.0);
-    other_transform.scale.x = 0.5;
-    other_transform.scale.y = 2;
+    other_transform.scale.Set(2, 3);
+    other_transform.position.Set(
+        window_width - texture_component.width * other_transform.scale.x,
+        window_height - texture_component.height * other_transform.scale.y
+    );
 
     world->entity("Other Ghost")
         .set<TextureComponent>(texture_component)

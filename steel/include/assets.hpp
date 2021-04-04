@@ -9,11 +9,7 @@ namespace Steel
 {
 	class Assets
 	{
-	private:
-        SharedPtr<SDL_Renderer> renderer;
-
 	public:
-
         Assets(SharedPtr<SDL_Renderer> renderer);
 
         /*
@@ -21,7 +17,9 @@ namespace Steel
         it when loading assets.
         */
         void SetRenderer(SharedPtr<SDL_Renderer> renderer);
-        
-        TextureComponent LoadTexture(std::string &filename);
+        TextureComponent LoadTexture(const std::string& filename);
+
+	private:
+        SharedPtr<SDL_Renderer> renderer;
 	};
 }

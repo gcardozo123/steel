@@ -15,9 +15,7 @@
 #endif
 
 namespace Steel 
-{	
-	static const long double PI = 3.141592653589793238462643383279502884L;
-	
+{
 	template<typename T>
 	using UniquePtr = std::unique_ptr<T>;
 	template<typename T, typename ... Args>

@@ -14,7 +14,7 @@ void Assets::SetRenderer(SharedPtr<SDL_Renderer> renderer)
     this->renderer = renderer;
 }
 
-TextureComponent Assets::LoadTexture(std::string & filename)
+TextureComponent Assets::LoadTexture(const std::string& filename)
 {
     TextureComponent texture_component;
     
@@ -23,11 +23,11 @@ TextureComponent Assets::LoadTexture(std::string & filename)
     texture_component.texture = SdlSharedPtr(
         SDL_CreateTextureFromSurface(renderer.get(), surface)
     );
+    texture_component.width = (float) surface->w;
+    texture_component.height = (float) surface->h;
     SDL_FreeSurface(surface);
     
     return texture_component;
 }
-
-
 
 }

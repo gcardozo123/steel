@@ -27,7 +27,6 @@ set(SOURCE_FILES
 	game.cpp
 	game_info.cpp
 	log.cpp
-	math/vector2.cpp
 	"${FLECS_DIR}flecs.c"
 )
 
@@ -39,6 +38,8 @@ set(HEADER_LIST
 	"${STEEL_INCLUDE_DIR}game_info.hpp"
 	"${STEEL_INCLUDE_DIR}log.hpp"
 	"${STEEL_INCLUDE_DIR}steel.hpp"
+	"${STEEL_INCLUDE_DIR}steel_math.hpp"
+	"${STEEL_INCLUDE_DIR}vector2.hpp"
 	"${STEEL_INCLUDE_DIR}steel_sdl.hpp"
 	"${FLECS_DIR}flecs.h"
 )

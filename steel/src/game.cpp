@@ -2,12 +2,10 @@
 
 #include "flecs.h"
 
-#include "components.hpp"
 #include "game.hpp"
 #include "game_info.hpp"
+#include "components.hpp"
 #include "log.hpp"
-#include "steel_sdl.hpp"
-
 
 namespace Steel
 {
@@ -36,13 +34,13 @@ void Game::Init(std::string window_title, int window_width, int window_height, b
     this->world = CreateSharedPtr<flecs::world>();
     this->world->set_target_fps(this->game_info->GetDesiredFps());
 
-    this->_InitializeRenderer();
-    this->_RegisterComponents();
+    this->InitializeRenderer();
+    this->RegisterComponents();
     
     assets.SetRenderer(this->renderer);
 }
 
-void Game::_InitializeRenderer()
+void Game::InitializeRenderer()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
@@ -87,14 +85,14 @@ void Game::_InitializeRenderer()
     }
 }
 
-void Game::_RegisterComponents()
+void Game::RegisterComponents()
 {
     flecs::component<TransformComponent>(*this->world);
     flecs::component<TextureComponent>(*this->world);
 }
 
 
-void Game::_ProcessInput()
+void Game::ProcessInput()
 {
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -124,20 +122,20 @@ void Game::Run()
     auto sdl_init = SDL_WasInit(SDL_INIT_EVERYTHING);
     STEEL_CORE_ASSERT(
         sdl_init & SDL_INIT_EVERYTHING,
-        "SDL wasn't initialized. Missing call to `_InitializeRenderer`."
+        "SDL wasn't initialized. Missing call to `InitializeRenderer`."
     );
 
     this->is_running = true;
     while (this->is_running) 
     {
-        _ProcessInput();
+        ProcessInput();
         //TODO: process Windows events
         this->world->progress();
-        this->_Render();
+        this->Render();
     }
 }
 
-void Game::_Render()
+void Game::Render()
 {
     //set background color:
     SDL_SetRenderDrawColor(renderer.get(), 50, 50, 80, 255);
@@ -145,9 +143,9 @@ void Game::_Render()
     SDL_RenderClear(renderer.get());
 
     // TODO: 
-    // 1. query all entites that have Transform + Texture
+    // 1. query all entities that have Transform + Texture
     // 2. render each one accordingly
-    // How? Add a `Resource` class, responsible for loading all types of 
+    // How? Add a `Assets` class, responsible for loading all types of
     // resources (images, audios, fonts, etc). Game or Resource will be 
     // responsible for binding the resource ID (a name? or SdlTexture directly?) to a given component.
     // Create a query for all entities with Position, Velocity
@@ -164,14 +162,15 @@ void Game::_Render()
         if (sdl_texture != nullptr)
         {
             int w, h;
-            SDL_QueryTexture(sdl_texture.get(), NULL, NULL, &w, &h);
+            SDL_QueryTexture(sdl_texture.get(), nullptr, nullptr, &w, &h);
             //TODO handle rotation
-            SDL_Rect dest;
-            dest.w = w * transform_component.scale.x;
-            dest.h = h * transform_component.scale.y;
+            SDL_FRect dest;
+            dest.w = transform_component.scale.x * (float) w;
+            dest.h = transform_component.scale.y * (float) h;
             dest.x = transform_component.position.x;
             dest.y = transform_component.position.y;
-            SDL_RenderCopy(this->renderer.get(), sdl_texture.get(), 0, &dest);
+            //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
+            SDL_RenderCopyF(this->renderer.get(), sdl_texture.get(), nullptr, &dest);
         }
 
     });
