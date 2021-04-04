@@ -22,9 +22,9 @@ Game::Game()
 Game::~Game()
 {}
 	
-void Game::Init(std::string window_title, int window_width, int window_height, bool is_window_resizable)
+void Game::Init(std::string window_title, int window_width, int window_height, bool is_window_resizable, float desired_fps)
 {   
-    this->game_info->SetDesiredFps(60.0f);
+    this->game_info->SetDesiredFps(desired_fps);
     this->game_info->SetWindowWidth(window_width);
     this->game_info->SetWindowHeight(window_height);
     this->game_info->SetWindowResizable(is_window_resizable);

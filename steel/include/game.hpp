@@ -18,7 +18,7 @@ public:
     Game();
     virtual ~Game();
 
-    void Init(std::string window_title, int window_width, int window_height, bool is_window_resizable);
+    void Init(std::string window_title, int window_width, int window_height, bool is_window_resizable, float desired_fps);
     void Run();
     void Quit();
 

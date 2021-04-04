@@ -21,6 +21,22 @@ typedef struct TransformComponent
     {}
 } TransformComponent;
 
+typedef struct VelocityComponent
+{
+    Math::Vector2 direction;
+    float scale;
+    VelocityComponent()
+        :
+        direction(0.0f, 0.0f),
+        scale(0.0f)
+    {}
+    VelocityComponent(const Math::Vector2& direction, float scale)
+        :
+        direction(direction),
+        scale(scale)
+    {}
+} VelocityComponent;
+
 typedef struct TextureComponent
 {
     std::string filename;

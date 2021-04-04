@@ -1,5 +1,6 @@
 
 #include <string>
+#include <functional>
 
 #include <catch2/catch.hpp>
 #include <SDL.h>
@@ -9,31 +10,33 @@
 
 using namespace Steel;
 
+void MoveSystemFunc(flecs::entity e, TransformComponent& transform, const VelocityComponent& velocity)
+{
+    Math::Vector2& p = transform.position;
+    const Math::Vector2& direction = velocity.direction;
+    p.x += (direction.x * velocity.scale) * e.delta_time();
+    p.y += (direction.y * velocity.scale) * e.delta_time();
+}
+
 TEST_CASE("test_game", "[test_game]")
 {
     Game game;
     float window_width = 1280, window_height = 720;
-    game.Init("Potato game", window_width, window_height, true);
+    game.Init("Potato game", window_width, window_height, true, 120.0f);
 
     std::string filename = "game_assets/ghost1.png";
     auto texture_component = game.GetAssets().LoadTexture(filename);
     auto world = game.GetWorld();
     
     // Create entities:
-    world->entity("Ghost")
+    VelocityComponent velocity {Math::Vector2(0.0f, 1.0f), 100.0f };
+    auto& ghost_entity = world->entity("Ghost")
         .set<TextureComponent>(texture_component)
-        .set<TransformComponent>(TransformComponent());
+        .set<TransformComponent>(TransformComponent())
+        .set<VelocityComponent>(velocity);
 
-    auto other_transform = TransformComponent();
-    other_transform.scale.Set(2, 3);
-    other_transform.position.Set(
-        window_width - texture_component.width * other_transform.scale.x,
-        window_height - texture_component.height * other_transform.scale.y
+    auto& move_system = world->system<TransformComponent , const VelocityComponent>("MoveSystem").each(
+        std::bind(MoveSystemFunc, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
     );
-
-    world->entity("Other Ghost")
-        .set<TextureComponent>(texture_component)
-        .set<TransformComponent>(other_transform);
-
     game.Run();
 }
