@@ -32,6 +32,7 @@ set(SOURCE_FILES
 
 set(HEADER_LIST 
 	"${STEEL_INCLUDE_DIR}assets.hpp"
+	"${STEEL_INCLUDE_DIR}color.hpp"
 	"${STEEL_INCLUDE_DIR}components.hpp"
 	"${STEEL_INCLUDE_DIR}core.hpp"
 	"${STEEL_INCLUDE_DIR}game.hpp"
@@ -40,6 +41,7 @@ set(HEADER_LIST
 	"${STEEL_INCLUDE_DIR}steel.hpp"
 	"${STEEL_INCLUDE_DIR}steel_math.hpp"
 	"${STEEL_INCLUDE_DIR}vector2.hpp"
+	"${STEEL_INCLUDE_DIR}vector4.hpp"
 	"${STEEL_INCLUDE_DIR}steel_sdl.hpp"
 	"${FLECS_DIR}flecs.h"
 )

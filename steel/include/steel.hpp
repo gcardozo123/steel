@@ -4,6 +4,7 @@
 
 #include "assets.hpp"
 #include "core.hpp"
+#include "color.hpp"
 #include "components.hpp"
 #include "game.hpp"
 #include "game_info.hpp"
@@ -11,6 +12,7 @@
 #include "steel_sdl.hpp"
 #include "steel_math.hpp"
 #include "vector2.hpp"
+#include "vector4.hpp"
 
 //third party
 #include "flecs.h"

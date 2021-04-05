@@ -163,14 +163,21 @@ void Game::Render()
         {
             int w, h;
             SDL_QueryTexture(sdl_texture.get(), nullptr, nullptr, &w, &h);
-            //TODO handle rotation
             SDL_FRect dest;
             dest.w = transform_component.scale.x * (float) w;
             dest.h = transform_component.scale.y * (float) h;
             dest.x = transform_component.position.x;
             dest.y = transform_component.position.y;
             //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
-            SDL_RenderCopyF(this->renderer.get(), sdl_texture.get(), nullptr, &dest);
+            SDL_RenderCopyExF(
+            this->renderer.get(),
+            sdl_texture.get(),
+            nullptr,
+            &dest,
+            transform_component.rotation,
+            nullptr,
+            SDL_RendererFlip::SDL_FLIP_NONE
+            );
         }
 
     });

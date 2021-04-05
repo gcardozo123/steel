@@ -35,8 +35,6 @@ TEST_CASE("test_game", "[test_game]")
         .set<TransformComponent>(TransformComponent())
         .set<VelocityComponent>(velocity);
 
-    auto& move_system = world->system<TransformComponent , const VelocityComponent>("MoveSystem").each(
-        std::bind(MoveSystemFunc, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
-    );
+    auto& move_system = world->system<TransformComponent , const VelocityComponent>("MoveSystem").each(MoveSystemFunc);
     game.Run();
 }
