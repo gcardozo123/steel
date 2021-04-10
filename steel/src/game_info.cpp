@@ -1,13 +1,15 @@
-#include "./game_info.hpp"
+#include "color.hpp"
+#include "game_info.hpp"
 
 namespace Steel
 {
     GameInfo::GameInfo(
-        double desired_fps, 
-        double time_scale, 
-        int window_width, 
-        int window_height, 
-        bool is_window_resizable, 
+        int window_width,
+        int window_height,
+        Steel::Color background_color,
+        double desired_fps,
+        double time_scale,
+        bool is_window_resizable,
         std::string window_title
     ) 
         :
@@ -16,7 +18,8 @@ namespace Steel
         window_width(window_width),
         window_height(window_height),
         is_window_resizable(is_window_resizable),
-        window_title(window_title)
+        window_title(window_title),
+        background_color(background_color)
     {}
     void GameInfo::SetDesiredFps(double value)
     {

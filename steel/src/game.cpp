@@ -22,8 +22,15 @@ Game::Game()
 Game::~Game()
 {}
 	
-void Game::Init(std::string window_title, int window_width, int window_height, bool is_window_resizable, float desired_fps)
-{   
+void Game::Init(
+    std::string window_title,
+    int window_width,
+    int window_height,
+    Steel::Color background_color,
+    bool is_window_resizable,
+    float desired_fps
+){
+    this->game_info->SetBackgroundColor(background_color);
     this->game_info->SetDesiredFps(desired_fps);
     this->game_info->SetWindowWidth(window_width);
     this->game_info->SetWindowHeight(window_height);
@@ -137,39 +144,45 @@ void Game::Run()
 
 void Game::Render()
 {
-    //set background color:
-    SDL_SetRenderDrawColor(renderer.get(), 50, 50, 80, 255);
-    //clear back buffer:
-    SDL_RenderClear(renderer.get());
+    const Color& bg_color = game_info->GetBackgroundColor();
+    SDL_SetRenderDrawColor(renderer.get(), bg_color.R(), bg_color.G(), bg_color.B(), bg_color.A());
+    SDL_RenderClear(renderer.get()); //clear back buffer
 
-    // TODO: 
-    // 1. query all entities that have Transform + Texture
-    // 2. render each one accordingly
-    // How? Add a `Assets` class, responsible for loading all types of
-    // resources (images, audios, fonts, etc). Game or Resource will be 
-    // responsible for binding the resource ID (a name? or SdlTexture directly?) to a given component.
-    // Create a query for all entities with Position, Velocity
-    
-    auto query = this->world->query<TextureComponent, TransformComponent>();
-    query.each([&](
-        flecs::entity e, 
-        TextureComponent& texture_component, 
-        const TransformComponent& transform_component
-    ){
-        //std::cout << "Entity name: " << e.name() << std::endl;
-        
-        auto sdl_texture = texture_component.texture;
-        if (sdl_texture != nullptr)
-        {
-            int w, h;
-            SDL_QueryTexture(sdl_texture.get(), nullptr, nullptr, &w, &h);
-            SDL_FRect dest;
-            dest.w = transform_component.scale.x * (float) w;
-            dest.h = transform_component.scale.y * (float) h;
-            dest.x = transform_component.position.x;
-            dest.y = transform_component.position.y;
-            //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
-            SDL_RenderCopyExF(
+    //TODO: think how can I define different layers
+    //TODO: handle hierarchical entities (position += parent.position):
+    //  https://github.com/SanderMertens/flecs/blob/master/examples/cpp/08_hierarchy/src/main.cpp
+    this->world->query<TextureComponent, TransformComponent>().each(
+        std::bind(&Game::RenderTexture, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
+    );
+    this->world->query<RectangleComponent>().each(
+        std::bind(&Game::RenderRectangle, this, std::placeholders::_1, std::placeholders::_2)
+    );
+    this->world->query<LineComponent>().each(
+        std::bind(&Game::RenderLine, this, std::placeholders::_1, std::placeholders::_2)
+    );
+
+    //swap front and back buffers:
+    SDL_RenderPresent(this->renderer.get());
+}
+
+void Game::RenderTexture(
+    flecs::entity e, TextureComponent &texture_component, const TransformComponent &transform_component)
+{
+    //std::cout << "Entity name: " << e.name() << std::endl;
+    auto sdl_texture = texture_component.texture;
+    if (!sdl_texture || (!texture_component.is_visible))
+    {
+        return;
+    }
+    int w, h;
+    SDL_QueryTexture(sdl_texture.get(), nullptr, nullptr, &w, &h);
+    SDL_FRect dest;
+    dest.w = transform_component.scale.x * (float) w;
+    dest.h = transform_component.scale.y * (float) h;
+    dest.x = transform_component.position.x;
+    dest.y = transform_component.position.y;
+    //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
+    SDL_RenderCopyExF(
             this->renderer.get(),
             sdl_texture.get(),
             nullptr,
@@ -177,13 +190,58 @@ void Game::Render()
             transform_component.rotation,
             nullptr,
             SDL_RendererFlip::SDL_FLIP_NONE
-            );
-        }
+    );
+}
 
-    });
+void Game::RenderRectangle(flecs::entity e, RectangleComponent& rect_component)
+{
+    if (!rect_component.is_visible)
+    {
+        return;
+    }
+    SDL_SetRenderDrawColor(
+        this->renderer.get(),
+        rect_component.color.R(),
+        rect_component.color.G(),
+        rect_component.color.B(),
+        rect_component.color.A()
+    );
+//TODO check how to handle hierarchies with flecs:
+// https://github.com/SanderMertens/flecs/blob/master/examples/cpp/08_hierarchy/src/main.cpp
+//    const Math::Vector2& position = e.has<TransformComponent>() ? e.get<TransformComponent>()->position : Math::Vector2();
+//    float x = rect_component.x + position.x;
+//    float y = rect_component.y + position.y;
+    SDL_FRect rect{rect_component.x, rect_component.y, rect_component.width, rect_component.height};
+    if (rect_component.is_filled)
+    {
+        //TODO: SDL_RenderFillRectsF apparently supports batching, so that is something to consider here
+        SDL_RenderFillRectF(this->renderer.get(), &rect);
+    }
+    else
+    {
+        //SDL_RenderDrawRectsF just does N calls to SDL_RenderDrawRectF, so no need to worry into changing to
+        // SDL_RenderDrawRectsF here
+        SDL_RenderDrawRectF(this->renderer.get(), &rect);
+    }
+}
 
-    //swap front and back buffers:
-    SDL_RenderPresent(this->renderer.get());
+void Game::RenderLine(flecs::entity e, LineComponent& line_component)
+{
+    if (!line_component.is_visible)
+    {
+        return;
+    }
+    SDL_SetRenderDrawColor(
+        this->renderer.get(),
+        line_component.color.R(),
+        line_component.color.G(),
+        line_component.color.B(),
+        line_component.color.A()
+    );
+    //TODO: SDL_RenderDrawLinesF apparently supports batching, so that's something to consider here
+    SDL_RenderDrawLineF(
+        this->renderer.get(), line_component.p1.x, line_component.p1.y, line_component.p2.x, line_component.p2.y
+    );
 }
 
 void Game::Quit()

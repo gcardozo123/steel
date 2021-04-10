@@ -7,10 +7,10 @@ namespace Math
 class Vector4
 {
 public:
-    union { float x; float width; float r; };
-    union { float y; float height; float g; };
-    union { float z; float depth; float b; };
-    union { float w; float time; float a; };
+    union { float x; float r; };
+    union { float y; float g; };
+    union { float z; float b; };
+    union { float w; float a; };
 
     Vector4() : x(0), y(0), z(0), w(0) {}
     ~Vector4() = default;

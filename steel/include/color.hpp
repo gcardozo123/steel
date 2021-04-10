@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vector4.hpp"
+#include "steel_math.hpp"
 
 namespace Steel
 {
@@ -20,17 +21,17 @@ public:
         ){}
     Color& operator=(const Color& c)
     {
-        color.r = c.r();
-        color.g = c.g();
-        color.b = c.b();
-        color.a = c.a();
+        color.r = c.R();
+        color.g = c.G();
+        color.b = c.B();
+        color.a = c.A();
         return *this;
     }
 
-    float r() const { return color.r; }
-    float g() const { return color.g; }
-    float b() const { return color.b; }
-    float a() const { return color.a; }
+    float R() const { return color.r; }
+    float G() const { return color.g; }
+    float B() const { return color.b; }
+    float A() const { return color.a; }
 
     void Set(float r, float g, float b, float a)
     {

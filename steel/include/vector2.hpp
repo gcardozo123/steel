@@ -12,8 +12,8 @@ namespace Math
     class Vector2
 	{
 	public:
-		union { float x; float width; };
-		union { float y; float height; };
+		float x;
+		float y;
 		
 		Vector2() : x(0.0), y(0.0){}
 		~Vector2() = default;

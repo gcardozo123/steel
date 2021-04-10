@@ -18,7 +18,14 @@ public:
     Game();
     virtual ~Game();
 
-    void Init(std::string window_title, int window_width, int window_height, bool is_window_resizable, float desired_fps);
+    void Init(
+        std::string window_title,
+        int window_width,
+        int window_height,
+        Steel::Color background_color,
+        bool is_window_resizable,
+        float desired_fps
+    );
     void Run();
     void Quit();
 
@@ -40,6 +47,12 @@ private:
     void RegisterComponents();
     void ProcessInput();
     void Render();
+
+    void RenderTexture(
+        flecs::entity e, TextureComponent& texture_component, const TransformComponent& transform_component
+    );
+    void RenderRectangle(flecs::entity e, RectangleComponent& rect_component);
+    void RenderLine(flecs::entity e, LineComponent& line_component);
 };
 
 }

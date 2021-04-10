@@ -42,13 +42,15 @@ typedef struct TextureComponent
     std::string filename;
     SharedPtr<SDL_Texture> texture;
     float width;
-    float height = 0;
+    float height;
+    bool is_visible;    // defaults to `true`
     TextureComponent()
         :
         filename(""),
         texture(nullptr),
         width(0.0f),
-        height(0.0f)
+        height(0.0f),
+        is_visible(true)
     {}
 } TextureComponent;
 
@@ -57,17 +59,20 @@ typedef struct LineComponent
     Math::Vector2 p1;
     Math::Vector2 p2;
     Color color; // defaults to blue
+    bool is_visible;
     LineComponent()
         :
         p1(Math::Vector2()),
         p2(Math::Vector2()),
-        color(52, 195, 235, 255)
+        color(52, 195, 235, 255),
+        is_visible(true)
     {}
     LineComponent(Math::Vector2& p1, Math::Vector2& p2, Color& c)
         :
         p1(p1),
         p2(p2),
-        color(c)
+        color(c),
+        is_visible(true)
     {}
 } LineComponent;
 
@@ -79,13 +84,14 @@ typedef struct RectangleComponent
     float height;
     Color color; // defaults to green
     bool is_filled; //if `true` renders a filled rectangle
+    bool is_visible; // defaults to `true`
     RectangleComponent()
         :
-        x(0.f), y(0.f), width(0.f), height(0.f), color(52, 235, 55, 255), is_filled(false)
+        x(0.f), y(0.f), width(0.f), height(0.f), color(52, 235, 55, 255), is_filled(false), is_visible(true)
     {}
     RectangleComponent(float x, float y, float width, float height, Color& c, bool is_filled = false)
         :
-        x(x), y(y), width(width), height(height), color(c), is_filled(is_filled)
+        x(x), y(y), width(width), height(height), color(c), is_filled(is_filled), is_visible(true)
     {}
 } RectangleComponent;
 
