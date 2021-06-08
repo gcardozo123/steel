@@ -29,11 +29,22 @@ public:
     void Run();
     void Quit();
 
+    /**
+     * @brief Returns the `flecs::world` used by Steel
+     */
     SharedPtr<flecs::world> GetWorld();
+    /**
+     * @brief Returns the `flecs::entity` to be used as root of your scene.
+     *
+     * Steel will always assume `GetSceneRoot` is the scene root. Make sure you don't
+     * change that.
+     */
+    SharedPtr<flecs::entity> GetSceneRoot();
     Assets& GetAssets() { return assets; }
 
 private:
     SharedPtr<flecs::world> world;
+    SharedPtr<flecs::entity> scene_root;
     bool is_running;
     SharedPtr<GameInfo> game_info;
 
@@ -48,11 +59,12 @@ private:
     void ProcessInput();
     void Render();
 
+    void UpdateTransforms(flecs::entity e, TransformComponent &transform_component);
     void RenderTexture(
         flecs::entity e, TextureComponent& texture_component, const TransformComponent& transform_component
     );
-    void RenderRectangle(flecs::entity e, RectangleComponent& rect_component);
-    void RenderLine(flecs::entity e, LineComponent& line_component);
+    void RenderRectangle(flecs::entity e, RectangleComponent& rect_component, const TransformComponent &transform_component);
+    void RenderLine(flecs::entity e, LineComponent& line_component, const TransformComponent &transform_component);
 };
 
 }

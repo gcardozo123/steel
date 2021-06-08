@@ -13,6 +13,7 @@ namespace Steel
 Game::Game()
     :
     world(nullptr),
+    scene_root(nullptr),
     is_running(false),
     game_info(CreateSharedPtr<GameInfo>()),
     window(nullptr),
@@ -43,6 +44,9 @@ void Game::Init(
 
     this->InitializeRenderer();
     this->RegisterComponents();
+    this->scene_root = CreateSharedPtr<flecs::entity>(
+            world->entity("SceneRoot").set<TransformComponent>(TransformComponent())
+    );
     
     assets.SetRenderer(this->renderer);
 }
@@ -94,8 +98,11 @@ void Game::InitializeRenderer()
 
 void Game::RegisterComponents()
 {
-    flecs::component<TransformComponent>(*this->world);
-    flecs::component<TextureComponent>(*this->world);
+    this->world->component<TransformComponent>();
+    this->world->component<TextureComponent>();
+    this->world->component<VelocityComponent>();
+    this->world->component<LineComponent>();
+    this->world->component<RectangleComponent>();
 }
 
 
@@ -154,21 +161,25 @@ void Game::Render()
     this->world->query<TextureComponent, TransformComponent>().each(
         std::bind(&Game::RenderTexture, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
     );
-    this->world->query<RectangleComponent>().each(
-        std::bind(&Game::RenderRectangle, this, std::placeholders::_1, std::placeholders::_2)
+    this->world->query<RectangleComponent, TransformComponent>().each(
+        std::bind(&Game::RenderRectangle, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
     );
-    this->world->query<LineComponent>().each(
-        std::bind(&Game::RenderLine, this, std::placeholders::_1, std::placeholders::_2)
+    this->world->query<LineComponent, TransformComponent>().each(
+        std::bind(&Game::RenderLine, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
     );
 
     //swap front and back buffers:
     SDL_RenderPresent(this->renderer.get());
 }
 
+void Game::UpdateTransforms(flecs::entity e, TransformComponent &transform_component)
+{
+
+}
+
 void Game::RenderTexture(
     flecs::entity e, TextureComponent &texture_component, const TransformComponent &transform_component)
 {
-    //std::cout << "Entity name: " << e.name() << std::endl;
     auto sdl_texture = texture_component.texture;
     if (!sdl_texture || (!texture_component.is_visible))
     {
@@ -193,7 +204,7 @@ void Game::RenderTexture(
     );
 }
 
-void Game::RenderRectangle(flecs::entity e, RectangleComponent& rect_component)
+void Game::RenderRectangle(flecs::entity e, RectangleComponent& rect_component, const TransformComponent &transform_component)
 {
     if (!rect_component.is_visible)
     {
@@ -225,7 +236,7 @@ void Game::RenderRectangle(flecs::entity e, RectangleComponent& rect_component)
     }
 }
 
-void Game::RenderLine(flecs::entity e, LineComponent& line_component)
+void Game::RenderLine(flecs::entity e, LineComponent& line_component, const TransformComponent &transform_component)
 {
     if (!line_component.is_visible)
     {
@@ -252,6 +263,11 @@ void Game::Quit()
 SharedPtr<flecs::world> Game::GetWorld()
 {
     return this->world;
+}
+
+SharedPtr<flecs::entity> Game::GetSceneRoot()
+{
+    return this->scene_root;
 }
 
 }
