@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake/sdl2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/entt" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/third_party/flecs" vcs="Git" />
   </component>
 </project>
