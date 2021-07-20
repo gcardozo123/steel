@@ -27,38 +27,22 @@ TEST_CASE("test_game", "[test_game]")
 
     // Create entities:
     std::string filename = "game_assets/ghost1.png";
-    entt::entity ghost = world.create();
-
-    auto& root_children = world.get<ChildrenComponent>(game.GetSceneRoot());
-    root_children.num_children = 1;
-    root_children.children[0] = ghost;
-
-    auto& transform = world.emplace<TransformComponent>(ghost);
-    transform.scale.Set(0.75, 0.75);
-    transform.position.x = 100;
-    transform.position.y = 200;
-    ChildrenComponent& ghost_children_component = world.emplace<ChildrenComponent>(ghost);
-    ghost_children_component.num_children = 3;
-
-    ParentComponent parent_component = world.emplace<ParentComponent>(ghost);
-    parent_component.parent = game.GetSceneRoot();
-
+    entt::entity ghost = ComponentUtils::AddChild( world, game.GetSceneRoot() );
     world.emplace<TextureComponent>(ghost, game.GetAssets().LoadTexture(filename));
     world.emplace<VelocityComponent>(ghost, Math::Vector2(1.0f, 1.0f), 1.0f);
 
+    auto& transform = world.get<TransformComponent>(ghost);
+    transform.scale.Set(0.75, 0.75);
+    transform.position.x = 100;
+    transform.position.y = 200;
+
     for (int i = 0; i < 3; i++)
     {
-        entt::entity child = world.create();
-        auto &child_transform = world.emplace<TransformComponent>(child);
+        entt::entity child = ComponentUtils::AddChild( world, ghost );
+        world.emplace<TextureComponent>( child, game.GetAssets().LoadTexture(filename) );
+
+        auto& child_transform = world.get<TransformComponent>( child );
         child_transform.position.x = child_transform.position.y = (float(i) + 1) * 20;
-
-        ChildrenComponent& grandchildren = world.emplace<ChildrenComponent>(child);
-        grandchildren.num_children = 0;
-        ParentComponent parent = world.emplace<ParentComponent>(child);
-        parent.parent = ghost;
-
-        world.emplace<TextureComponent>(child, game.GetAssets().LoadTexture(filename));
-        ghost_children_component.children[i] = entt::entity(child);
     }
     game.Run();
 }

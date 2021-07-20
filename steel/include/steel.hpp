@@ -6,6 +6,7 @@
 #include "core.hpp"
 #include "color.hpp"
 #include "components.hpp"
+#include "component_utils.hpp"
 #include "game.hpp"
 #include "game_info.hpp"
 #include "log.hpp"

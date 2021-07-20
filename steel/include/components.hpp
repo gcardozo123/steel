@@ -11,14 +11,11 @@
 namespace Steel
 {
 
-struct ChildrenComponent
+struct RelationshipComponent
 {
-    std::size_t num_children = 0;
-    std::array<entt::entity, 20> children;
-};
-
-struct ParentComponent
-{
+    entt::entity first_child{entt::null};
+    entt::entity prev_sibling{entt::null};
+    entt::entity next_sibling{entt::null};
     entt::entity parent{entt::null};
 };
 

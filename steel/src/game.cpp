@@ -5,6 +5,7 @@
 #include "game.hpp"
 #include "game_info.hpp"
 #include "components.hpp"
+#include "component_utils.hpp"
 #include "log.hpp"
 
 namespace Steel
@@ -279,27 +280,23 @@ void Game::UpdateTransforms()
         entt::entity parent_entity = queue.front();
         queue.pop();
 
-        auto& parent_children_component = world.get<ChildrenComponent>(parent_entity);
-        const auto& parent_transform = world.get<TransformComponent>(parent_entity);
-
-        printf("\nCurrent Parent: %d, Numchildren: %d\n", parent_entity, parent_children_component.num_children);
-        for(std::size_t i{}; i < parent_children_component.num_children; ++i)
-        {
-            entt::entity child = parent_children_component.children[i];
-            auto it = visited.find(child);
+        const auto& parent_transform = world.get<TransformComponent>( parent_entity );
+        printf("\nCurrent parent: %d\n", parent_entity );
+        ComponentUtils::ForEachDirectChild( world, parent_entity, [&]( entt::entity child ) {
+            auto it = visited.find( child );
             bool was_visited = it != visited.end();
-            if ( !was_visited && this->world.valid(child) )
+            if ( !was_visited && this->world.valid( child ) )
             {
                 visited[child] = true;
-                queue.push(child);
+                queue.push( child );
 
                 auto& transform = world.get<TransformComponent>(child);
                 transform.world_position.x = transform.position.x + parent_transform.world_position.x;
                 transform.world_position.y = transform.position.y + parent_transform.world_position.y;
-                printf("entity id: %d, position: %f, %f\n", child, transform.world_position.x, transform.world_position.y);
+                printf("Entity id: %d, position: %f, %f\n", child, transform.world_position.x, transform.world_position.y);
                 //rotation and scale are intentionally NOT being propagated to children here
             }
-        }
+        });
     }
     printf("UpdateLogic End\n");
     //TODO: Handle physics
@@ -439,7 +436,7 @@ void Game::InitializeEntities()
 {
     this->scene_root = this->world.create();
     auto& transform = this->world.emplace<TransformComponent>(scene_root);
-    this->world.emplace<ChildrenComponent>(scene_root);
+    this->world.emplace<RelationshipComponent>(scene_root);
 }
 
 }

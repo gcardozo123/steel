@@ -24,6 +24,7 @@ string(REPLACE "\\" "/" ENTT_DIR "${ENTT_DIR}")
 
 set(SOURCE_FILES
 	assets.cpp
+	component_utils.cpp
 	game.cpp
 	game_info.cpp
 	log.cpp
@@ -33,6 +34,7 @@ set(HEADER_LIST
 	"${STEEL_INCLUDE_DIR}assets.hpp"
 	"${STEEL_INCLUDE_DIR}color.hpp"
 	"${STEEL_INCLUDE_DIR}components.hpp"
+	"${STEEL_INCLUDE_DIR}component_utils.hpp"
 	"${STEEL_INCLUDE_DIR}core.hpp"
 	"${STEEL_INCLUDE_DIR}game.hpp"
 	"${STEEL_INCLUDE_DIR}game_info.hpp"
