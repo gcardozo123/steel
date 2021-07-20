@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <entt.hpp>
+
 #include "vector2.hpp"
 #include "steel_sdl.hpp"
 #include "color.hpp"
@@ -9,9 +11,21 @@
 namespace Steel
 {
 
-typedef struct TransformComponent
+struct ChildrenComponent
+{
+    std::size_t num_children = 0;
+    std::array<entt::entity, 20> children;
+};
+
+struct ParentComponent
+{
+    entt::entity parent{entt::null};
+};
+
+struct TransformComponent
 {
     Math::Vector2 position;
+    Math::Vector2 world_position;
     Math::Vector2 scale;
     double rotation;    // in degrees
     TransformComponent()
@@ -19,9 +33,9 @@ typedef struct TransformComponent
         scale(1.0, 1.0),
         rotation(0)
     {}
-} TransformComponent;
+};
 
-typedef struct VelocityComponent
+struct VelocityComponent
 {
     Math::Vector2 direction;
     float scale;
@@ -35,9 +49,9 @@ typedef struct VelocityComponent
         direction(direction),
         scale(scale)
     {}
-} VelocityComponent;
+};
 
-typedef struct TextureComponent
+struct TextureComponent
 {
     std::string filename;
     SharedPtr<SDL_Texture> texture;
@@ -52,9 +66,9 @@ typedef struct TextureComponent
         height(0.0f),
         is_visible(true)
     {}
-} TextureComponent;
+};
 
-typedef struct LineComponent
+struct LineComponent
 {
     Math::Vector2 p1;
     Math::Vector2 p2;
@@ -74,9 +88,9 @@ typedef struct LineComponent
         color(c),
         is_visible(true)
     {}
-} LineComponent;
+};
 
-typedef struct RectangleComponent
+struct RectangleComponent
 {
     float x;
     float y;
@@ -93,6 +107,6 @@ typedef struct RectangleComponent
         :
         x(x), y(y), width(width), height(height), color(c), is_filled(is_filled), is_visible(true)
     {}
-} RectangleComponent;
+};
 
 }

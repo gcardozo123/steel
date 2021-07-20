@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <entt.hpp>
+
 #include "assets.hpp"
 #include "core.hpp"
 #include "steel_sdl.hpp"
@@ -28,21 +30,27 @@ public:
     void Quit();
 
     /**
-     * @brief Returns the `flecs::world` used by Steel
+     * @brief Returns the `entt::registry` used by Steel
      */
-//    SharedPtr<flecs::world> GetWorld();
+    entt::registry& GetWorld();
     /**
-     * @brief Returns the `flecs::entity` to be used as root of your scene.
+     * @brief Returns the `entt::entity` to be used as root of your scene.
      *
      * Steel will always assume `GetSceneRoot` is the scene root. Make sure you don't
      * change that.
      */
-//    SharedPtr<flecs::entity> GetSceneRoot();
+    entt::entity GetSceneRoot();
     Assets& GetAssets() { return assets; }
 
 private:
-//    SharedPtr<flecs::world> world;
-//    SharedPtr<flecs::entity> scene_root;
+    entt::registry world;
+    entt::entity scene_root;
+//    entt::entity hud;
+    /// Root of all gameplay menus, to be used for inventories and other menus you access during the gameplay loop.
+//    entt::entity in_game_menus;
+    /// Root of all menus that are not part of the gameplay: pause menu, options, etc.
+//    entt::entity menus;
+
     bool is_running;
     SharedPtr<GameInfo> game_info;
 
@@ -53,7 +61,7 @@ private:
     Assets assets;
 
     void InitializeRenderer();
-    void RegisterComponents();
+    void InitializeEntities();
     void ProcessInput();
     void UpdateLogic(double dt);
     void Render();

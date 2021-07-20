@@ -10,14 +10,6 @@
 
 using namespace Steel;
 
-void MoveSystemFunc(TransformComponent& transform, const VelocityComponent& velocity)
-{
-    Math::Vector2& p = transform.position;
-    const Math::Vector2& direction = velocity.direction;
-//    p.x += (direction.x * velocity.scale) * e.delta_time();
-//    p.y += (direction.y * velocity.scale) * e.delta_time();
-}
-
 TEST_CASE("test_game", "[test_game]")
 {
     Game game;
@@ -31,35 +23,42 @@ TEST_CASE("test_game", "[test_game]")
         120.0f
     );
 
-    std::string filename = "game_assets/ghost1.png";
-    auto texture_component = game.GetAssets().LoadTexture(filename);
-//    auto world = game.GetWorld();
-    
+    auto& world = game.GetWorld();
+
     // Create entities:
-    VelocityComponent velocity {Math::Vector2(0.0f, 1.0f), 100.0f };
-//    auto& ghost_entity = world->entity("Ghost")
-//        .set<TextureComponent>(texture_component)
-//        .set<TransformComponent>(TransformComponent())
-//        .set<VelocityComponent>(velocity)
-//        .add_childof(*game.GetSceneRoot().get());
-//
-//    auto& move_system = world->system<TransformComponent , const VelocityComponent>("MoveSystem").each(MoveSystemFunc);
-//
-//    Color c{3, 252, 227, 255};
-//    RectangleComponent rect_comp{0.f, 0.f, 128.f, 128.f, c, false};
-//    auto& r1 = world->entity("r1")
-//        .set<RectangleComponent>(rect_comp)
-//        .set<TransformComponent>(TransformComponent());
-//        //.add_childof(ghost_entity);
+    std::string filename = "game_assets/ghost1.png";
+    entt::entity ghost = world.create();
 
-    //TODO: handle hierarchies: ghost_entity.set<RectangleComponent>(rect_comp);
+    auto& root_children = world.get<ChildrenComponent>(game.GetSceneRoot());
+    root_children.num_children = 1;
+    root_children.children[0] = ghost;
 
+    auto& transform = world.emplace<TransformComponent>(ghost);
+    transform.scale.Set(0.75, 0.75);
+    transform.position.x = 100;
+    transform.position.y = 200;
+    ChildrenComponent& ghost_children_component = world.emplace<ChildrenComponent>(ghost);
+    ghost_children_component.num_children = 3;
 
-    Math::Vector2 p1 {100.f, 100.f};
-    Math::Vector2 p2 {200.f, 200.f};
-    // LineComponent line_comp {p1, p2, c};
-//    auto& l1 = world->entity("l1")
-//        .set<LineComponent>(line_comp);
+    ParentComponent parent_component = world.emplace<ParentComponent>(ghost);
+    parent_component.parent = game.GetSceneRoot();
 
+    world.emplace<TextureComponent>(ghost, game.GetAssets().LoadTexture(filename));
+    world.emplace<VelocityComponent>(ghost, Math::Vector2(1.0f, 1.0f), 1.0f);
+
+    for (int i = 0; i < 3; i++)
+    {
+        entt::entity child = world.create();
+        auto &child_transform = world.emplace<TransformComponent>(child);
+        child_transform.position.x = child_transform.position.y = (float(i) + 1) * 20;
+
+        ChildrenComponent& grandchildren = world.emplace<ChildrenComponent>(child);
+        grandchildren.num_children = 0;
+        ParentComponent parent = world.emplace<ParentComponent>(child);
+        parent.parent = ghost;
+
+        world.emplace<TextureComponent>(child, game.GetAssets().LoadTexture(filename));
+        ghost_children_component.children[i] = entt::entity(child);
+    }
     game.Run();
 }

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <queue>
+#include <map>
 
 #include "game.hpp"
 #include "game_info.hpp"
@@ -10,8 +12,7 @@ namespace Steel
 
 Game::Game()
     :
-//    world(nullptr),
-//    scene_root(nullptr),
+    scene_root(entt::null),
     is_running(false),
     game_info(CreateSharedPtr<GameInfo>()),
     window(nullptr),
@@ -37,16 +38,9 @@ void Game::Init(
     this->game_info->SetWindowTitle(window_title);
     this->game_info->SetTimeScale(1.0);
 
-//    this->world = CreateSharedPtr<flecs::world>();
-//    this->world->set_target_fps(this->game_info->GetDesiredFps());
-
     this->InitializeRenderer();
-    this->RegisterComponents();
-//    this->scene_root = CreateSharedPtr<flecs::entity>(
-//            world->entity("SceneRoot").set<TransformComponent>(TransformComponent())
-//    );
-    
-    assets.SetRenderer(this->renderer);
+    this->InitializeEntities();
+    this->assets.SetRenderer(this->renderer);
 }
 
 void Game::InitializeRenderer()
@@ -94,16 +88,6 @@ void Game::InitializeRenderer()
         return;
     }
 }
-
-void Game::RegisterComponents()
-{
-//    this->world->component<TransformComponent>();
-//    this->world->component<TextureComponent>();
-//    this->world->component<VelocityComponent>();
-//    this->world->component<LineComponent>();
-//    this->world->component<RectangleComponent>();
-}
-
 
 void Game::ProcessInput()
 {
@@ -224,7 +208,7 @@ void Game::Run()
         }
         delta_time /= time_history_count;
         // TODO: framerate is spiking when game starts then stays around 60fps (independent of desired_fps)
-        // printf("fps: %f\n", (1.0 / delta_time * 1000 * 10000));
+        //printf("fps: %f\n", (1.0 / delta_time * 1000 * 10000));
 
         //add to the accumulator
         frame_accumulator += delta_time;
@@ -272,7 +256,51 @@ void Game::Run()
 
 void Game::UpdateLogic(double dt)
 {
-    //handle scene graph and physics
+    printf("\nUpdateLogic Start\n");
+    // Breadth first search transforms update:
+    entt::entity start = scene_root;
+    std::map<entt::entity, bool> visited;
+    visited[start] = true;
+    std::queue<entt::entity> queue;
+    queue.push(start);
+
+    while (!queue.empty())
+    {
+        entt::entity parent_entity = queue.front();
+        queue.pop();
+
+        auto& parent_children_component = world.get<ChildrenComponent>(parent_entity);
+        const auto& parent_transform = world.get<TransformComponent>(parent_entity);
+
+        printf("\nCurrent Parent: %d, Numchildren: %d\n", parent_entity, parent_children_component.num_children);
+        for(std::size_t i{}; i < parent_children_component.num_children; ++i)
+        {
+            entt::entity child = parent_children_component.children[i];
+            auto it = visited.find(child);
+            bool was_visited = it != visited.end();
+            if ( !was_visited && this->world.valid(child) )
+            {
+                visited[child] = true;
+                queue.push(child);
+
+                auto& transform = world.get<TransformComponent>(child);
+                printf("entity id: %d\n", child);
+                transform.world_position.x = transform.position.x + parent_transform.world_position.x;
+                transform.world_position.y = transform.position.y + parent_transform.world_position.y;
+                //rotation and scale are intentionally NOT being propagated to children here
+            }
+        }
+    }
+    printf("UpdateLogic End\n");
+    //TODO: Handle physics
+}
+
+void MoveSystemFunc(TransformComponent& transform, const VelocityComponent& velocity)
+{
+    Math::Vector2& p = transform.position;
+    const Math::Vector2& direction = velocity.direction;
+    p.x += (direction.x * velocity.scale); //* e.delta_time();
+    p.y += (direction.y * velocity.scale); //* e.delta_time();
 }
 
 void Game::Render()
@@ -282,8 +310,15 @@ void Game::Render()
     SDL_RenderClear(renderer.get()); //clear back buffer
 
     //TODO: think how can I define different layers
-    //TODO: handle hierarchical entities (position += parent.position):
-    //  https://github.com/SanderMertens/flecs/blob/master/examples/cpp/08_hierarchy/src/main.cpp
+    //TODO: engine should offer functions for: creating entities, register system with dt
+
+    //TODO: there's a bug where in the first frame the ghost is appearing in the wrong place of the screen
+    auto oview = world.view<VelocityComponent, TransformComponent>();
+    oview.each([&](auto &velocity, auto &transform) { MoveSystemFunc(transform,velocity); });
+
+    auto view = this->world.view<TextureComponent, TransformComponent>();
+    view.each([&](auto &texture, auto &transform) { RenderTexture(texture, transform); });
+
 //    this->world->query<TextureComponent, TransformComponent>().each(
 //        std::bind(&Game::RenderTexture, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
 //    );
@@ -316,8 +351,8 @@ void Game::RenderTexture(
     SDL_FRect dest;
     dest.w = transform_component.scale.x * (float) w;
     dest.h = transform_component.scale.y * (float) h;
-    dest.x = transform_component.position.x;
-    dest.y = transform_component.position.y;
+    dest.x = transform_component.world_position.x;
+    dest.y = transform_component.world_position.y;
     //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
     SDL_RenderCopyExF(
             this->renderer.get(),
@@ -343,7 +378,7 @@ void Game::RenderRectangle(RectangleComponent& rect_component, const TransformCo
         rect_component.color.B(),
         rect_component.color.A()
     );
-//TODO check how to handle hierarchies with flecs:
+//TODO check how to handle hierarchies:
 // https://github.com/SanderMertens/flecs/blob/master/examples/cpp/08_hierarchy/src/main.cpp
 //    const Math::Vector2& position = e.has<TransformComponent>() ? e.get<TransformComponent>()->position : Math::Vector2();
 //    float x = rect_component.x + position.x;
@@ -386,14 +421,21 @@ void Game::Quit()
     this->is_running = false;
 }
 
-//SharedPtr<flecs::world> Game::GetWorld()
-//{
-//    return this->world;
-//}
-//
-//SharedPtr<flecs::entity> Game::GetSceneRoot()
-//{
-//    return this->scene_root;
-//}
+entt::registry& Game::GetWorld()
+{
+    return this->world;
+}
+
+entt::entity Game::GetSceneRoot()
+{
+    return this->scene_root;
+}
+
+void Game::InitializeEntities()
+{
+    this->scene_root = this->world.create();
+    auto& transform = this->world.emplace<TransformComponent>(scene_root);
+    this->world.emplace<ChildrenComponent>(scene_root);
+}
 
 }

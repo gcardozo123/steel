@@ -19,7 +19,7 @@ message(STATUS ">>>> SDL2_LIBRARY: ${SDL2_LIBRARY}")
 set(STEEL_INCLUDE_DIR "../include/")
 string(REPLACE "\\" "/" STEEL_INCLUDE_DIR "${STEEL_INCLUDE_DIR}")
 
-set(ENTT_DIR "../../third_party/entt/single_include/entt/")
+set(ENTT_DIR "../../third_party/entt/src/entt/")
 string(REPLACE "\\" "/" ENTT_DIR "${ENTT_DIR}")
 
 set(SOURCE_FILES
