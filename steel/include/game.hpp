@@ -63,10 +63,10 @@ private:
     void InitializeRenderer();
     void InitializeEntities();
     void ProcessInput();
-    void UpdateLogic(double dt);
+    void UpdateLogic(DeltaTime dt);
     void Render();
 
-    void UpdateTransforms(TransformComponent &transform_component);
+    void UpdateTransforms();
     void RenderTexture(
         TextureComponent& texture_component, const TransformComponent& transform_component
     );

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <queue>
-#include <map>
+#include <unordered_map>
 
 #include "game.hpp"
 #include "game_info.hpp"
@@ -131,7 +131,7 @@ void Game::Run()
     double update_multiplicity = game_info->GetTimeScale();
 
     // compute how many ticks one update should be
-    double fixed_delta_time = 1.0 / update_rate;
+    DeltaTime fixed_delta_time = 1.0 / update_rate;
     int64_t desired_frame_time = SDL_GetPerformanceFrequency() / update_rate;
 
     // these are to snap deltaTime to vsync values if it's close enough
@@ -163,6 +163,10 @@ void Game::Run()
     bool resync = true;
     int64_t prev_frame_time = SDL_GetPerformanceCounter();
     int64_t frame_accumulator = 0;
+
+    // Update logic once before the game loop so transforms are properly initialized
+    // TODO: remove this after "frame_accumulator starting as zero and skipping UpdateLogic" is fixed
+    UpdateLogic(fixed_delta_time);
 
     is_running = true;
     while (is_running)
@@ -241,6 +245,7 @@ void Game::Run()
 
         //fixed framerate, no interpolation, in other words, if the framerate drops, we still update the game logic
         //in a fixed number of steps. Reference: https://youtu.be/lW6ZtvQVzyg
+        // TODO: review this as frame_accumulator starts as 0 it'll skip the UpdateLogic and render without updated transforms
         while (frame_accumulator >= desired_frame_time * update_multiplicity)
         {
             for (int i = 0; i < update_multiplicity; i++)
@@ -256,10 +261,15 @@ void Game::Run()
 
 void Game::UpdateLogic(double dt)
 {
+    UpdateTransforms();
+}
+
+void Game::UpdateTransforms()
+{
     printf("\nUpdateLogic Start\n");
     // Breadth first search transforms update:
     entt::entity start = scene_root;
-    std::map<entt::entity, bool> visited;
+    std::unordered_map<entt::entity, bool> visited;
     visited[start] = true;
     std::queue<entt::entity> queue;
     queue.push(start);
@@ -284,9 +294,9 @@ void Game::UpdateLogic(double dt)
                 queue.push(child);
 
                 auto& transform = world.get<TransformComponent>(child);
-                printf("entity id: %d\n", child);
                 transform.world_position.x = transform.position.x + parent_transform.world_position.x;
                 transform.world_position.y = transform.position.y + parent_transform.world_position.y;
+                printf("entity id: %d, position: %f, %f\n", child, transform.world_position.x, transform.world_position.y);
                 //rotation and scale are intentionally NOT being propagated to children here
             }
         }
@@ -312,7 +322,6 @@ void Game::Render()
     //TODO: think how can I define different layers
     //TODO: engine should offer functions for: creating entities, register system with dt
 
-    //TODO: there's a bug where in the first frame the ghost is appearing in the wrong place of the screen
     auto oview = world.view<VelocityComponent, TransformComponent>();
     oview.each([&](auto &velocity, auto &transform) { MoveSystemFunc(transform,velocity); });
 
@@ -331,11 +340,6 @@ void Game::Render()
 
     //swap front and back buffers:
     SDL_RenderPresent(this->renderer.get());
-}
-
-void Game::UpdateTransforms(TransformComponent &transform_component)
-{
-
 }
 
 void Game::RenderTexture(
