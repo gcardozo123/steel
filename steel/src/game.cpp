@@ -37,7 +37,7 @@ void Game::Init(
     this->game_info->SetWindowHeight(window_height);
     this->game_info->SetWindowResizable(is_window_resizable);
     this->game_info->SetWindowTitle(window_title);
-    this->game_info->SetTimeScale(1.0);
+    this->game_info->SetUpdateMultiplicity( 1 );
 
     this->InitializeRenderer();
     this->InitializeEntities();
@@ -129,7 +129,7 @@ void Game::Run()
     );
 
     double update_rate = game_info->GetDesiredFps();
-    double update_multiplicity = game_info->GetTimeScale();
+    double update_multiplicity = game_info->GetUpdateMultiplicity();
 
     // compute how many ticks one update should be
     DeltaTime fixed_delta_time = 1.0 / update_rate;

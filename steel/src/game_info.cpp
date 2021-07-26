@@ -8,13 +8,13 @@ namespace Steel
         int window_height,
         Steel::Color background_color,
         double desired_fps,
-        double time_scale,
+        int update_multiplicity,
         bool is_window_resizable,
         std::string window_title
     ) 
         :
         desired_fps(desired_fps),
-        time_scale(time_scale),
+        update_multiplicity( update_multiplicity ),
         window_width(window_width),
         window_height(window_height),
         is_window_resizable(is_window_resizable),
@@ -61,13 +61,13 @@ namespace Steel
     {
         return this->window_title;
     }
-    void GameInfo::SetTimeScale(double value)
+    void GameInfo::SetUpdateMultiplicity( int value )
     {
-        this->time_scale = value;
+        this->update_multiplicity = value;
     }
-    double GameInfo::GetTimeScale()
+    int GameInfo::GetUpdateMultiplicity() const
     {
-        return this->time_scale;
+        return this->update_multiplicity;
     }
 
 }
