@@ -18,7 +18,8 @@ Game::Game()
     game_info(CreateSharedPtr<GameInfo>()),
     window(nullptr),
     renderer(nullptr),
-    assets(nullptr)
+    assets(nullptr),
+    update_game_func( []( Steel::DeltaTime ) {} )
 {}
 Game::~Game()
 {}
@@ -260,14 +261,16 @@ void Game::Run()
     }
 }
 
-void Game::UpdateLogic(double dt)
+void Game::UpdateLogic( DeltaTime dt )
 {
     UpdateTransforms();
+    //TODO: Handle physics
+    this->update_game_func( dt );
 }
 
 void Game::UpdateTransforms()
 {
-    printf("\nUpdateLogic Start\n");
+    // printf("\nUpdateLogic Start\n");
     // Breadth first search transforms update:
     entt::entity start = scene_root;
     std::unordered_map<entt::entity, bool> visited;
@@ -281,7 +284,7 @@ void Game::UpdateTransforms()
         queue.pop();
 
         const auto& parent_transform = world.get<TransformComponent>( parent_entity );
-        printf("\nCurrent parent: %d\n", parent_entity );
+        // printf("\nCurrent parent: %d\n", parent_entity );
         ComponentUtils::ForEachDirectChild( world, parent_entity, [&]( entt::entity child ) {
             auto it = visited.find( child );
             bool was_visited = it != visited.end();
@@ -293,21 +296,12 @@ void Game::UpdateTransforms()
                 auto& transform = world.get<TransformComponent>(child);
                 transform.world_position.x = transform.position.x + parent_transform.world_position.x;
                 transform.world_position.y = transform.position.y + parent_transform.world_position.y;
-                printf("Entity id: %d, position: %f, %f\n", child, transform.world_position.x, transform.world_position.y);
+                // printf("Entity id: %d, position: %f, %f\n", child, transform.world_position.x, transform.world_position.y);
                 //rotation and scale are intentionally NOT being propagated to children here
             }
         });
     }
-    printf("UpdateLogic End\n");
-    //TODO: Handle physics
-}
-
-void MoveSystemFunc(TransformComponent& transform, const VelocityComponent& velocity)
-{
-    Math::Vector2& p = transform.position;
-    const Math::Vector2& direction = velocity.direction;
-    p.x += (direction.x * velocity.scale); //* e.delta_time();
-    p.y += (direction.y * velocity.scale); //* e.delta_time();
+    // printf("UpdateLogic End\n");
 }
 
 void Game::Render()
@@ -317,10 +311,6 @@ void Game::Render()
     SDL_RenderClear(renderer.get()); //clear back buffer
 
     //TODO: think how can I define different layers
-    //TODO: engine should offer functions for: creating entities, register system with dt
-
-    auto oview = world.view<VelocityComponent, TransformComponent>();
-    oview.each([&](auto &velocity, auto &transform) { MoveSystemFunc(transform,velocity); });
 
     auto view = this->world.view<TextureComponent, TransformComponent>();
     view.each([&](auto &texture, auto &transform) { RenderTexture(texture, transform); });
@@ -435,8 +425,13 @@ entt::entity Game::GetSceneRoot()
 void Game::InitializeEntities()
 {
     this->scene_root = this->world.create();
-    auto& transform = this->world.emplace<TransformComponent>(scene_root);
-    this->world.emplace<RelationshipComponent>(scene_root);
+    auto& transform = this->world.emplace<TransformComponent>( scene_root );
+    this->world.emplace<RelationshipComponent>( scene_root );
+}
+
+void Game::SetUpdateGameFunction( GameUpdateFunction update_game_func )
+{
+    this->update_game_func = update_game_func;
 }
 
 }

@@ -14,6 +14,8 @@ class GameInfo;
 
 class Game
 {
+    using GameUpdateFunction = std::function<void (DeltaTime)>;
+
 public:
     Game();
     virtual ~Game();
@@ -26,6 +28,7 @@ public:
         bool is_window_resizable,
         float desired_fps
     );
+    void SetUpdateGameFunction( GameUpdateFunction update_game_func );
     void Run();
     void Quit();
 
@@ -59,6 +62,8 @@ private:
     SharedPtr<SDL_Renderer> renderer;
 
     Assets assets;
+
+    GameUpdateFunction update_game_func;
 
     void InitializeRenderer();
     void InitializeEntities();
