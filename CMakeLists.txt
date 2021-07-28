@@ -43,4 +43,4 @@ string(REPLACE "\\" "/" CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}")
 
 add_subdirectory(steel/src)
 add_subdirectory(steel_tests)
-add_subdirectory(third_party/flecs)
+add_subdirectory(third_party/entt)

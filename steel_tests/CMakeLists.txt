@@ -12,7 +12,12 @@ add_executable(${TARGET_NAME}
   main.cpp
   ${UNIT_TEST_SOURCE_LIST})
 
-target_link_libraries(${TARGET_NAME} PRIVATE steel Catch2::Catch2)  
+target_link_libraries(${TARGET_NAME} PRIVATE steel Catch2::Catch2)
+
+set_target_properties(
+        ${TARGET_NAME} PROPERTIES
+        CXX_STANDARD 17
+)
 
 add_test(
   NAME ${TARGET_NAME}

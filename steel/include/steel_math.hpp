@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <algorithm>
-#include "assets.hpp"
 
 namespace Steel
 {
