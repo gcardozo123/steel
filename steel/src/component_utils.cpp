@@ -30,7 +30,7 @@ entt::entity ComponentUtils::AddChild( entt::registry& world, entt::entity paren
     if ( !world.valid( parent_relations.first_child ) )
     {
         parent_relations.first_child = child;
-        printf("First child: %d\n", child );
+        //printf("First child: %d\n", child );
         return child;
     }
 
@@ -44,6 +44,19 @@ entt::entity ComponentUtils::AddChild( entt::registry& world, entt::entity paren
     current_child_relations->next_sibling = child;
     child_relations.prev_sibling = current_child;
     return child;
+}
+
+entt::entity ComponentUtils::GetChild( entt::registry& world, entt::entity parent, int index )
+{
+    RelationshipComponent& parent_relations = world.get<RelationshipComponent>( parent );
+    entt::entity result{ parent_relations.first_child };
+    RelationshipComponent* current_child_relations = &world.get<RelationshipComponent>( result );
+    for ( int i = 0; i < index; ++i )
+    {
+        result = current_child_relations->next_sibling;
+        current_child_relations = &world.get<RelationshipComponent>( result );
+    }
+    return result;
 }
 
 }
