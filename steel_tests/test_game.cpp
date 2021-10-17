@@ -21,16 +21,10 @@ void MoveSystemFunc( TransformComponent& transform, const VelocityComponent& vel
 
 TEST_CASE( "test_game", "[test_game]" )
 {
-    Game game;
-    float window_width = 1280, window_height = 720;
-    game.Init(
-        "Potato game",
-        window_width,
-        window_height,
-        Steel::Color(199, 199, 199, 255),
-        true,
-        60.0f
-    );
+    GameInfo game_info{};
+    game_info.window_title = "Potato Game!";
+    Game game( &game_info );
+    game.Init();
 
     auto& world = game.GetWorld();
 

@@ -10,7 +10,7 @@
 
 namespace Steel
 {
-class GameInfo;
+struct GameInfo;
 
 class Game
 {
@@ -22,17 +22,10 @@ class Game
     };
 
 public:
-    Game();
+    explicit Game(const GameInfo* game_info);
     virtual ~Game();
 
-    void Init(
-        std::string window_title,
-        int window_width,
-        int window_height,
-        Steel::Color background_color,
-        bool is_window_resizable,
-        float desired_fps
-    );
+    void Init();
     void SetUpdateGameFunction( GameUpdateFunction update_game_func );
     void Run();
     void Quit();
@@ -61,7 +54,7 @@ private:
 
     bool is_running;
     RenderingMode rendering_mode = RenderingMode::PixelPerfect;
-    SharedPtr<GameInfo> game_info;
+    const GameInfo* game_info;
 
     //Rendering:
     SharedPtr<SDL_Window> window;

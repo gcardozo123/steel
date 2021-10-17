@@ -26,7 +26,6 @@ set(SOURCE_FILES
 	assets.cpp
 	component_utils.cpp
 	game.cpp
-	game_info.cpp
 	log.cpp
 )
 

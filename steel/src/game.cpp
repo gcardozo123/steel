@@ -11,38 +11,23 @@
 namespace Steel
 {
 
-Game::Game()
+Game::Game(const GameInfo* game_info)
     :
     scene_root(entt::null),
     is_running(false),
-    game_info(CreateSharedPtr<GameInfo>()),
+    game_info(game_info),
     window(nullptr),
     renderer(nullptr),
     assets(nullptr),
     update_game_func( []( Steel::DeltaTime ) {} )
 {}
-Game::~Game()
-{}
-	
-void Game::Init(
-    std::string window_title,
-    int window_width,
-    int window_height,
-    Steel::Color background_color,
-    bool is_window_resizable,
-    float desired_fps
-){
-    this->game_info->SetBackgroundColor(background_color);
-    this->game_info->SetDesiredFps(desired_fps);
-    this->game_info->SetWindowWidth(window_width);
-    this->game_info->SetWindowHeight(window_height);
-    this->game_info->SetWindowResizable(is_window_resizable);
-    this->game_info->SetWindowTitle(window_title);
-    this->game_info->SetUpdateMultiplicity( 1 );
 
-    this->InitializeRenderer();
-    this->InitializeEntities();
-    this->assets.SetRenderer(this->renderer);
+Game::~Game() = default;
+	
+void Game::Init(){
+    InitializeRenderer();
+    InitializeEntities();
+    assets.SetRenderer(renderer);
 }
 
 void Game::InitializeRenderer()
@@ -60,16 +45,16 @@ void Game::InitializeRenderer()
         return;
     }
     Uint32 sdl_flags = (
-        game_info->IsWindowResizable() ?
+        game_info->is_window_resizable ?
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE : SDL_WINDOW_SHOWN
-        );
+    );
     window = SdlSharedPtr(
         SDL_CreateWindow(
-            game_info->GetWindowTitle().c_str(),
+            game_info->window_title.c_str(),
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
-            game_info->GetWindowWidth(),
-            game_info->GetWindowHeight(),
+            game_info->window_width,
+            game_info->window_height,
             sdl_flags
         )
     );
@@ -99,14 +84,14 @@ void Game::ProcessInput()
     {
         case SDL_QUIT:
         {
-            this->Quit();
+            Quit();
             break;
         }
         case SDL_KEYDOWN:
         {
             if (event.key.keysym.sym == SDLK_ESCAPE)
             {
-                this->Quit();
+                Quit();
             }
         }
         default:
@@ -129,8 +114,8 @@ void Game::Run()
         "SDL wasn't initialized. Missing call to `InitializeRenderer`."
     );
 
-    double update_rate = game_info->GetDesiredFps();
-    double update_multiplicity = game_info->GetUpdateMultiplicity();
+    double update_rate = game_info->desired_fps;
+    double update_multiplicity = game_info->update_multiplicity;
 
     // compute how many ticks one update should be
     DeltaTime fixed_delta_time = 1.0 / update_rate;
@@ -306,7 +291,7 @@ void Game::UpdateTransforms()
 
 void Game::Render()
 {
-    const Color& bg_color = game_info->GetBackgroundColor();
+    const Color& bg_color = game_info->bg_color;
     SDL_SetRenderDrawColor(renderer.get(), bg_color.R(), bg_color.G(), bg_color.B(), bg_color.A());
     SDL_RenderClear(renderer.get()); //clear back buffer
 
