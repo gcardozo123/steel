@@ -1,6 +1,6 @@
 #include "component_utils.hpp"
 #include "components.hpp"
-#include "core.hpp"
+#include "asserts.hpp"
 
 namespace Steel
 {
@@ -19,7 +19,7 @@ void ComponentUtils::ForEachDirectChild( entt::registry& world, entt::entity par
 
 entt::entity ComponentUtils::AddChild( entt::registry& world, entt::entity parent )
 {
-    //STEEL_CORE_ASSERT( world.valid( parent ), "Trying to add a child to an invalid parent" ); //TODO fix identifier not found
+    STEEL_CORE_ASSERT( world.valid( parent ), "Trying to add a child to an invalid parent" );
 
     entt::entity child = world.create();
     world.emplace<TransformComponent>( child );

@@ -32,6 +32,7 @@ set(SOURCE_FILES
 
 set(HEADER_LIST 
 	"${STEEL_INCLUDE_DIR}assets.hpp"
+	"${STEEL_INCLUDE_DIR}asserts.hpp"
 	"${STEEL_INCLUDE_DIR}color.hpp"
 	"${STEEL_INCLUDE_DIR}components.hpp"
 	"${STEEL_INCLUDE_DIR}component_utils.hpp"

@@ -6,7 +6,7 @@
 #include "game_info.hpp"
 #include "components.hpp"
 #include "component_utils.hpp"
-#include "log.hpp"
+#include "asserts.hpp"
 
 namespace Steel
 {
