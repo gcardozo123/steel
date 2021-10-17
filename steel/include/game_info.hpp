@@ -5,7 +5,13 @@
 
 namespace Steel
 {
-	struct GameInfo
+    enum class RenderingMode
+    {
+        PixelPerfect,
+        Default,
+    };
+
+    struct GameInfo
 	{
         double desired_fps;
         int update_multiplicity;
@@ -14,8 +20,11 @@ namespace Steel
         bool is_window_resizable;
         std::string window_title;
         Color bg_color{};
+        RenderingMode rendering_mode;
+
 
 	    explicit GameInfo(
+            RenderingMode rendering_mode = RenderingMode::PixelPerfect,
             int window_width = 1280,
             int window_height = 720,
             Color bg_color = Color(199, 199, 199, 255),
@@ -24,6 +33,7 @@ namespace Steel
             bool is_window_resizable = false,
             std::string window_title = "Steel"
         ) :
+        rendering_mode(rendering_mode),
         window_width(window_width),
         window_height(window_height),
         bg_color(std::move(bg_color)),

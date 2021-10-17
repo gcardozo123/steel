@@ -325,7 +325,7 @@ void Game::RenderTexture(
     int w, h;
     SDL_QueryTexture(sdl_texture.get(), nullptr, nullptr, &w, &h);
     SDL_FRect dest;
-    switch (rendering_mode)
+    switch (game_info->rendering_mode)
     {
         case RenderingMode::PixelPerfect:
         {

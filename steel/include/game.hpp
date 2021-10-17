@@ -15,11 +15,6 @@ struct GameInfo;
 class Game
 {
     using GameUpdateFunction = std::function<void (DeltaTime)>;
-    enum class RenderingMode
-    {
-        PixelPerfect,
-        Default,
-    };
 
 public:
     explicit Game(const GameInfo* game_info);
@@ -53,7 +48,6 @@ private:
 //    entt::entity menus;
 
     bool is_running;
-    RenderingMode rendering_mode = RenderingMode::PixelPerfect;
     const GameInfo* game_info;
 
     //Rendering:

@@ -1,11 +1,13 @@
 #include "assets.hpp"
 
+#include <utility>
+
 namespace Steel
 {
 
 Assets::Assets(SharedPtr<SDL_Renderer> renderer)
     :
-    renderer(renderer)
+    renderer(std::move(renderer))
 {
 }
 
