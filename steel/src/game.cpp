@@ -1,4 +1,3 @@
-#include <iostream>
 #include <queue>
 #include <unordered_map>
 
@@ -7,6 +6,7 @@
 #include "components.hpp"
 #include "component_utils.hpp"
 #include "asserts.hpp"
+#include "steel_math.hpp"
 
 namespace Steel
 {
@@ -340,10 +340,25 @@ void Game::RenderTexture(
     int w, h;
     SDL_QueryTexture(sdl_texture.get(), nullptr, nullptr, &w, &h);
     SDL_FRect dest;
-    dest.w = transform_component.scale.x * (float) w;
-    dest.h = transform_component.scale.y * (float) h;
-    dest.x = transform_component.world_position.x;
-    dest.y = transform_component.world_position.y;
+    switch (rendering_mode)
+    {
+        case RenderingMode::PixelPerfect:
+        {
+            dest.w = Math::Round(transform_component.scale.x * (float) w);
+            dest.h = Math::Round(transform_component.scale.y * (float) h);
+            dest.x = Math::Round(transform_component.world_position.x);
+            dest.y = Math::Round(transform_component.world_position.y);
+            break;
+        }
+        case RenderingMode::Default:
+        {
+            dest.w = transform_component.scale.x * (float) w;
+            dest.h = transform_component.scale.y * (float) h;
+            dest.x = transform_component.world_position.x;
+            dest.y = transform_component.world_position.y;
+            break;
+        }
+    }
     //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
     SDL_RenderCopyExF(
             this->renderer.get(),

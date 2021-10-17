@@ -15,6 +15,11 @@ class GameInfo;
 class Game
 {
     using GameUpdateFunction = std::function<void (DeltaTime)>;
+    enum class RenderingMode
+    {
+        PixelPerfect,
+        Default,
+    };
 
 public:
     Game();
@@ -55,6 +60,7 @@ private:
 //    entt::entity menus;
 
     bool is_running;
+    RenderingMode rendering_mode = RenderingMode::PixelPerfect;
     SharedPtr<GameInfo> game_info;
 
     //Rendering:
