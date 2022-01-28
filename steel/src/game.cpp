@@ -250,7 +250,7 @@ void Game::UpdateLogic( DeltaTime dt )
 {
     UpdateTransforms();
     //TODO: Handle physics
-    this->update_game_func( dt );
+    update_game_func( dt );
 }
 
 void Game::UpdateTransforms()
@@ -273,7 +273,7 @@ void Game::UpdateTransforms()
         ComponentUtils::ForEachDirectChild( world, parent_entity, [&]( entt::entity child ) {
             auto it = visited.find( child );
             bool was_visited = it != visited.end();
-            if ( !was_visited && this->world.valid( child ) )
+            if ( !was_visited && world.valid( child ) )
             {
                 visited[child] = true;
                 queue.push( child );
@@ -297,7 +297,7 @@ void Game::Render()
 
     //TODO: think how can I define different layers
 
-    auto view = this->world.view<TextureComponent, TransformComponent>();
+    auto view = world.view<TextureComponent, TransformComponent>();
     view.each([&](auto &texture, auto &transform) { RenderTexture(texture, transform); });
 
 //    this->world->query<TextureComponent, TransformComponent>().each(
@@ -311,7 +311,7 @@ void Game::Render()
 //    );
 
     //swap front and back buffers:
-    SDL_RenderPresent(this->renderer.get());
+    SDL_RenderPresent(renderer.get());
 }
 
 void Game::RenderTexture(
@@ -346,7 +346,7 @@ void Game::RenderTexture(
     }
     //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
     SDL_RenderCopyExF(
-            this->renderer.get(),
+            renderer.get(),
             sdl_texture.get(),
             nullptr,
             &dest,
@@ -363,7 +363,7 @@ void Game::RenderRectangle(RectangleComponent& rect_component, const TransformCo
         return;
     }
     SDL_SetRenderDrawColor(
-        this->renderer.get(),
+        renderer.get(),
         rect_component.color.R(),
         rect_component.color.G(),
         rect_component.color.B(),
@@ -378,13 +378,13 @@ void Game::RenderRectangle(RectangleComponent& rect_component, const TransformCo
     if (rect_component.is_filled)
     {
         //TODO: SDL_RenderFillRectsF apparently supports batching, so that is something to consider here
-        SDL_RenderFillRectF(this->renderer.get(), &rect);
+        SDL_RenderFillRectF(renderer.get(), &rect);
     }
     else
     {
         //SDL_RenderDrawRectsF just does N calls to SDL_RenderDrawRectF, so no need to worry into changing to
         // SDL_RenderDrawRectsF here
-        SDL_RenderDrawRectF(this->renderer.get(), &rect);
+        SDL_RenderDrawRectF(renderer.get(), &rect);
     }
 }
 
@@ -395,7 +395,7 @@ void Game::RenderLine(LineComponent& line_component, const TransformComponent &t
         return;
     }
     SDL_SetRenderDrawColor(
-        this->renderer.get(),
+        renderer.get(),
         line_component.color.R(),
         line_component.color.G(),
         line_component.color.B(),
@@ -403,30 +403,30 @@ void Game::RenderLine(LineComponent& line_component, const TransformComponent &t
     );
     //TODO: SDL_RenderDrawLinesF apparently supports batching, so that's something to consider here
     SDL_RenderDrawLineF(
-        this->renderer.get(), line_component.p1.x, line_component.p1.y, line_component.p2.x, line_component.p2.y
+        renderer.get(), line_component.p1.x, line_component.p1.y, line_component.p2.x, line_component.p2.y
     );
 }
 
 void Game::Quit()
 {
-    this->is_running = false;
+    is_running = false;
 }
 
 entt::registry& Game::GetWorld()
 {
-    return this->world;
+    return world;
 }
 
 entt::entity Game::GetSceneRoot()
 {
-    return this->scene_root;
+    return scene_root;
 }
 
 void Game::InitializeEntities()
 {
-    this->scene_root = this->world.create();
-    auto& transform = this->world.emplace<TransformComponent>( scene_root );
-    this->world.emplace<RelationshipComponent>( scene_root );
+    scene_root = world.create();
+    auto& transform = world.emplace<TransformComponent>( scene_root );
+    world.emplace<RelationshipComponent>( scene_root );
 }
 
 void Game::SetUpdateGameFunction( GameUpdateFunction update_game_func )

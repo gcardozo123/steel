@@ -41,11 +41,6 @@ public:
 private:
     entt::registry world;
     entt::entity scene_root;
-//    entt::entity hud;
-    /// Root of all gameplay menus, to be used for inventories and other menus you access during the gameplay loop.
-//    entt::entity in_game_menus;
-    /// Root of all menus that are not part of the gameplay: pause menu, options, etc.
-//    entt::entity menus;
 
     bool is_running;
     const GameInfo* game_info;
