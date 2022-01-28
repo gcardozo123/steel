@@ -8,25 +8,34 @@
 
 
 namespace Steel 
-{	
+{
     static void SdlDeleteResource(SDL_Window   *r) { SDL_DestroyWindow(r); }
     static void SdlDeleteResource(SDL_Renderer *r) { SDL_DestroyRenderer(r); }
     static void SdlDeleteResource(SDL_Texture  *r) { SDL_DestroyTexture(r); }
     static void SdlDeleteResource(SDL_Surface  *r) { SDL_FreeSurface(r); }
 
     template <typename T>
-    std::shared_ptr<T> SdlSharedPtr(T *t)
+    struct SdlResourceDeleter
     {
-        return std::shared_ptr<T>(t, [](T *t) { SdlDeleteResource(t); });
-    }
-    
-    struct SteelSdlWindowDestroyer
-    {
-        void operator()(SDL_Window* w) const
+        void operator()(T *t) const
         {
-            SDL_DestroyWindow(w);
+            SdlDeleteResource(t);
         }
     };
 
+    template <typename T>
+    std::shared_ptr<T> SdlMakeSharedPtr(T *t)
+    {
+        return std::shared_ptr<T>(t, [](T *t) { SdlDeleteResource(t); });
+    }
+
+    template<typename T>
+    using SdlUniquePtr = std::unique_ptr<T, SdlResourceDeleter<T>>;
+
+    template <typename T>
+    SdlUniquePtr<T> SdlMakeUniquePtr( T *t)
+    {
+        return SdlUniquePtr<T>(t);
+    }
 
 }

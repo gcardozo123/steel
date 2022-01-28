@@ -45,8 +45,7 @@ private:
     bool is_running;
     const GameInfo* game_info;
 
-    //Rendering:
-    SharedPtr<SDL_Window> window;
+    SdlUniquePtr<SDL_Window> window;
     SharedPtr<SDL_Renderer> renderer;
 
     Assets assets;

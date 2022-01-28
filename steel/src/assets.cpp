@@ -22,8 +22,8 @@ TextureComponent Assets::LoadTexture(const std::string& filename)
     
     texture_component.filename = filename;
     SDL_Surface *surface = IMG_Load(filename.c_str());
-    texture_component.texture = SdlSharedPtr(
-        SDL_CreateTextureFromSurface(renderer.get(), surface)
+    texture_component.texture = SdlMakeSharedPtr(
+            SDL_CreateTextureFromSurface( renderer.get(), surface )
     );
     texture_component.width = (float) surface->w;
     texture_component.height = (float) surface->h;

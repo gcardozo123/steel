@@ -48,15 +48,15 @@ void Game::InitializeRenderer()
         game_info->is_window_resizable ?
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE : SDL_WINDOW_SHOWN
     );
-    window = SdlSharedPtr(
-        SDL_CreateWindow(
-            game_info->window_title.c_str(),
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            game_info->window_width,
-            game_info->window_height,
-            sdl_flags
-        )
+    window = SdlMakeUniquePtr(
+            SDL_CreateWindow(
+                    game_info->window_title.c_str(),
+                    SDL_WINDOWPOS_CENTERED,
+                    SDL_WINDOWPOS_CENTERED,
+                    game_info->window_width,
+                    game_info->window_height,
+                    sdl_flags
+            )
     );
     if (!window)
     {
@@ -64,7 +64,7 @@ void Game::InitializeRenderer()
         SDL_Quit();
         return;
     }
-    renderer = SdlSharedPtr(
+    renderer = SdlMakeSharedPtr(
         //TODO: add vsync member to GameInfo. Rename GameInfo to GameSettings
         SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
     );
