@@ -1,35 +1,37 @@
 #include "assets.hpp"
-
-#include <utility>
+#include "log.hpp"
 
 namespace Steel
 {
 
-Assets::Assets(SharedPtr<SDL_Renderer> renderer)
+Assets::Assets()
     :
-    renderer(std::move(renderer))
+    renderer(nullptr)
 {
 }
 
-void Assets::SetRenderer(SharedPtr<SDL_Renderer> renderer)
+void Assets::SetRenderer(SDL_Renderer* renderer)
 {
     this->renderer = renderer;
 }
 
 TextureComponent Assets::LoadTexture(const std::string& filename)
 {
-    TextureComponent texture_component;
-    
-    texture_component.filename = filename;
+    TextureComponent res;
+    if (!renderer)
+    {
+        STEEL_CORE_ERROR("Missing renderer for Assets to work with");
+        return res;
+    }
     SDL_Surface *surface = IMG_Load(filename.c_str());
-    texture_component.texture = SdlMakeSharedPtr(
-            SDL_CreateTextureFromSurface( renderer.get(), surface )
+    res.texture = SdlMakeUniquePtr(
+        SDL_CreateTextureFromSurface(renderer, surface)
     );
-    texture_component.width = (float) surface->w;
-    texture_component.height = (float) surface->h;
+    res.width = (float) surface->w;
+    res.height = (float) surface->h;
     SDL_FreeSurface(surface);
     
-    return texture_component;
+    return res;
 }
 
 }

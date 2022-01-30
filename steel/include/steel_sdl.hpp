@@ -33,7 +33,7 @@ namespace Steel
     using SdlUniquePtr = std::unique_ptr<T, SdlResourceDeleter<T>>;
 
     template <typename T>
-    SdlUniquePtr<T> SdlMakeUniquePtr( T *t)
+    SdlUniquePtr<T> SdlMakeUniquePtr(T *t)
     {
         return SdlUniquePtr<T>(t);
     }

@@ -18,7 +18,6 @@ Game::Game(const GameInfo* game_info)
     game_info(game_info),
     window(nullptr),
     renderer(nullptr),
-    assets(nullptr),
     update_game_func( []( Steel::DeltaTime ) {} )
 {}
 
@@ -27,7 +26,7 @@ Game::~Game() = default;
 void Game::Init(){
     InitializeRenderer();
     InitializeEntities();
-    assets.SetRenderer(renderer);
+    assets.SetRenderer(renderer.get());
 }
 
 void Game::InitializeRenderer()
@@ -317,13 +316,13 @@ void Game::Render()
 void Game::RenderTexture(
     TextureComponent &texture_component, const TransformComponent &transform_component)
 {
-    auto sdl_texture = texture_component.texture;
+    SDL_Texture* sdl_texture = texture_component.texture.get();
     if (!sdl_texture || (!texture_component.is_visible))
     {
         return;
     }
     int w, h;
-    SDL_QueryTexture(sdl_texture.get(), nullptr, nullptr, &w, &h);
+    SDL_QueryTexture(sdl_texture, nullptr, nullptr, &w, &h);
     SDL_FRect dest;
     switch (game_info->rendering_mode)
     {
@@ -347,7 +346,7 @@ void Game::RenderTexture(
     //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
     SDL_RenderCopyExF(
             renderer.get(),
-            sdl_texture.get(),
+            sdl_texture,
             nullptr,
             &dest,
             transform_component.rotation,

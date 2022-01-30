@@ -50,14 +50,12 @@ struct VelocityComponent
 
 struct TextureComponent
 {
-    std::string filename;
-    SharedPtr<SDL_Texture> texture;
+    SdlUniquePtr<SDL_Texture> texture;
     float width;
     float height;
     bool is_visible;    // defaults to `true`
     TextureComponent()
         :
-        filename(""),
         texture(nullptr),
         width(0.0f),
         height(0.0f),

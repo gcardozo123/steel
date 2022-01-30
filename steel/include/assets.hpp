@@ -10,16 +10,12 @@ namespace Steel
 	class Assets
 	{
 	public:
-        Assets(SharedPtr<SDL_Renderer> renderer);
+        Assets();
 
-        /*
-        Assets needs a `SDL_Renderer` because `SDL` relies on 
-        it when loading assets.
-        */
-        void SetRenderer(SharedPtr<SDL_Renderer> renderer);
+        void SetRenderer(SDL_Renderer* renderer);
         TextureComponent LoadTexture(const std::string& filename);
 
 	private:
-        SharedPtr<SDL_Renderer> renderer;
+        SDL_Renderer* renderer;
 	};
 }
