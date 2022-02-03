@@ -321,23 +321,21 @@ void Game::RenderTexture(
     {
         return;
     }
-    int w, h;
-    SDL_QueryTexture(sdl_texture, nullptr, nullptr, &w, &h);
     SDL_FRect dest;
     switch (game_info->rendering_mode)
     {
         case RenderingMode::PixelPerfect:
         {
-            dest.w = Math::Round(transform_component.scale.x * (float) w);
-            dest.h = Math::Round(transform_component.scale.y * (float) h);
+            dest.w = Math::Round(transform_component.scale.x * (float) texture_component.width);
+            dest.h = Math::Round(transform_component.scale.y * (float) texture_component.height);
             dest.x = Math::Round(transform_component.world_position.x);
             dest.y = Math::Round(transform_component.world_position.y);
             break;
         }
         case RenderingMode::Default:
         {
-            dest.w = transform_component.scale.x * (float) w;
-            dest.h = transform_component.scale.y * (float) h;
+            dest.w = transform_component.scale.x * (float) texture_component.width;
+            dest.h = transform_component.scale.y * (float) texture_component.height;
             dest.x = transform_component.world_position.x;
             dest.y = transform_component.world_position.y;
             break;
