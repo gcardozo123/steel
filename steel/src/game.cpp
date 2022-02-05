@@ -24,6 +24,7 @@ Game::Game(const GameInfo* game_info)
 Game::~Game() = default;
 	
 void Game::Init(){
+    Log::Init();
     InitializeRenderer();
     InitializeEntities();
     assets.SetRenderer(renderer.get());
@@ -293,8 +294,6 @@ void Game::Render()
     const Color& bg_color = game_info->bg_color;
     SDL_SetRenderDrawColor(renderer.get(), bg_color.R(), bg_color.G(), bg_color.B(), bg_color.A());
     SDL_RenderClear(renderer.get()); //clear back buffer
-
-    //TODO: think how can I define different layers
 
     auto view = world.view<TextureComponent, TransformComponent>();
     view.each([&](auto &texture, auto &transform) { RenderTexture(texture, transform); });

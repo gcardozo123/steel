@@ -1,5 +1,5 @@
 #include "assets.hpp"
-#include "log.hpp"
+#include "asserts.hpp"
 
 namespace Steel
 {
@@ -19,7 +19,7 @@ TextureComponent Assets::LoadTexture(const std::string& filename)
 {
     if (!renderer)
     {
-        STEEL_CORE_ERROR("Missing renderer for Assets to work with");
+        STEEL_CORE_ASSERT(false, "Missing renderer for Assets to work with");
         return {};
     }
     SDL_Surface *surface = IMG_Load(filename.c_str());
