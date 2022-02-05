@@ -2,8 +2,9 @@
 
 // Used by Steel games, so users can just `#include <Steel.hpp>`
 
-#include "assets.hpp"
 #include "core.hpp"
+#include "asserts.hpp"
+#include "assets.hpp"
 #include "color.hpp"
 #include "components.hpp"
 #include "component_utils.hpp"

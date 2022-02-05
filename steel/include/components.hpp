@@ -50,19 +50,37 @@ struct VelocityComponent
 
 struct TextureComponent
 {
-    std::string filename;
-    SharedPtr<SDL_Texture> texture;
-    float width;
-    float height;
-    bool is_visible;    // defaults to `true`
-    TextureComponent()
+    SdlUniquePtr<SDL_Texture> texture;
+    int width{};
+    int height{};
+    bool is_visible = false;
+    TextureComponent() = default;
+    TextureComponent(SDL_Texture* sdl_texture, const int width, const int height, const bool is_visible=true)
         :
-        filename(""),
-        texture(nullptr),
-        width(0.0f),
-        height(0.0f),
-        is_visible(true)
+        texture(SdlMakeUniquePtr(sdl_texture)),
+        width(width),
+        height(height),
+        is_visible(is_visible)
     {}
+    TextureComponent(const TextureComponent& ) = delete;
+    TextureComponent& operator=(const TextureComponent& ) = delete;
+
+    TextureComponent(TextureComponent &&other) noexcept
+    {
+        *this = std::move(other);
+    }
+    TextureComponent& operator=(TextureComponent &&other) noexcept
+    {
+        texture = std::move(other.texture);
+        width = other.width;
+        height = other.height;
+        is_visible = other.is_visible;
+        other.width = 0;
+        other.height = 0;
+        other.is_visible = false;
+        return *this;
+    }
+
 };
 
 struct LineComponent

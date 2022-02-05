@@ -12,8 +12,8 @@ namespace Steel
 	public:
 		static void Init();
 
-		inline static SharedPtr<spdlog::logger>& GetCoreLogger() { return static_core_logger; }
-		inline static SharedPtr<spdlog::logger>& GetClientLogger() { return static_client_logger; }
+		static SharedPtr<spdlog::logger>& GetCoreLogger() { return static_core_logger; }
+		static SharedPtr<spdlog::logger>& GetClientLogger() { return static_client_logger; }
 	private:
 		static SharedPtr<spdlog::logger> static_core_logger;
 		static SharedPtr<spdlog::logger> static_client_logger;

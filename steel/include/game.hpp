@@ -10,24 +10,17 @@
 
 namespace Steel
 {
-class GameInfo;
+struct GameInfo;
 
 class Game
 {
     using GameUpdateFunction = std::function<void (DeltaTime)>;
 
 public:
-    Game();
+    explicit Game(const GameInfo* game_info);
     virtual ~Game();
 
-    void Init(
-        std::string window_title,
-        int window_width,
-        int window_height,
-        Steel::Color background_color,
-        bool is_window_resizable,
-        float desired_fps
-    );
+    void Init();
     void SetUpdateGameFunction( GameUpdateFunction update_game_func );
     void Run();
     void Quit();
@@ -48,17 +41,11 @@ public:
 private:
     entt::registry world;
     entt::entity scene_root;
-//    entt::entity hud;
-    /// Root of all gameplay menus, to be used for inventories and other menus you access during the gameplay loop.
-//    entt::entity in_game_menus;
-    /// Root of all menus that are not part of the gameplay: pause menu, options, etc.
-//    entt::entity menus;
 
     bool is_running;
-    SharedPtr<GameInfo> game_info;
+    const GameInfo* game_info;
 
-    //Rendering:
-    SharedPtr<SDL_Window> window;
+    SdlUniquePtr<SDL_Window> window;
     SharedPtr<SDL_Renderer> renderer;
 
     Assets assets;
@@ -73,7 +60,7 @@ private:
 
     void UpdateTransforms();
     void RenderTexture(
-        TextureComponent& texture_component, const TransformComponent& transform_component
+        const TextureComponent& texture_component, const TransformComponent& transform_component
     );
     void RenderRectangle(RectangleComponent& rect_component, const TransformComponent &transform_component);
     void RenderLine(LineComponent& line_component, const TransformComponent &transform_component);

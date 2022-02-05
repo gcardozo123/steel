@@ -10,7 +10,7 @@ class Color
 public:
     Color() = default;
     ~Color() = default;
-    //RGBA values should be between [0, 255]
+    ///RGBA values should be between [0, 255]
     Color(float r, float g, float b, float a)
         :
         color(

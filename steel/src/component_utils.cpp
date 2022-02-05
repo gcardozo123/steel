@@ -1,6 +1,8 @@
+#include <queue>
+
 #include "component_utils.hpp"
 #include "components.hpp"
-#include "core.hpp"
+#include "asserts.hpp"
 
 namespace Steel
 {
@@ -19,7 +21,7 @@ void ComponentUtils::ForEachDirectChild( entt::registry& world, entt::entity par
 
 entt::entity ComponentUtils::AddChild( entt::registry& world, entt::entity parent )
 {
-    //STEEL_CORE_ASSERT( world.valid( parent ), "Trying to add a child to an invalid parent" ); //TODO fix identifier not found
+    STEEL_CORE_ASSERT( world.valid( parent ), "Trying to add a child to an invalid parent" );
 
     entt::entity child = world.create();
     world.emplace<TransformComponent>( child );
@@ -57,6 +59,33 @@ entt::entity ComponentUtils::GetChild( entt::registry& world, entt::entity paren
         current_child_relations = &world.get<RelationshipComponent>( result );
     }
     return result;
+}
+
+void ComponentUtils::ForEachInHierarchy( entt::registry& world, entt::entity parent, const Func&& func )
+{
+    entt::entity start = parent;
+    std::unordered_map<entt::entity, bool> visited;
+    visited[start] = true;
+    std::queue<entt::entity> queue;
+    queue.push(start);
+    func( parent );
+
+    while (!queue.empty())
+    {
+        entt::entity parent_entity = queue.front();
+        queue.pop();
+
+        ComponentUtils::ForEachDirectChild( world, parent_entity, [&]( entt::entity child ) {
+            auto it = visited.find( child );
+            bool was_visited = it != visited.end();
+            if ( !was_visited && world.valid( child ) )
+            {
+                visited[child] = true;
+                queue.push( child );
+                func( child );
+            }
+        });
+    }
 }
 
 }

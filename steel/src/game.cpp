@@ -1,4 +1,3 @@
-#include <iostream>
 #include <queue>
 #include <unordered_map>
 
@@ -6,43 +5,29 @@
 #include "game_info.hpp"
 #include "components.hpp"
 #include "component_utils.hpp"
-#include "log.hpp"
+#include "asserts.hpp"
+#include "steel_math.hpp"
 
 namespace Steel
 {
 
-Game::Game()
+Game::Game(const GameInfo* game_info)
     :
     scene_root(entt::null),
     is_running(false),
-    game_info(CreateSharedPtr<GameInfo>()),
+    game_info(game_info),
     window(nullptr),
     renderer(nullptr),
-    assets(nullptr),
     update_game_func( []( Steel::DeltaTime ) {} )
 {}
-Game::~Game()
-{}
-	
-void Game::Init(
-    std::string window_title,
-    int window_width,
-    int window_height,
-    Steel::Color background_color,
-    bool is_window_resizable,
-    float desired_fps
-){
-    this->game_info->SetBackgroundColor(background_color);
-    this->game_info->SetDesiredFps(desired_fps);
-    this->game_info->SetWindowWidth(window_width);
-    this->game_info->SetWindowHeight(window_height);
-    this->game_info->SetWindowResizable(is_window_resizable);
-    this->game_info->SetWindowTitle(window_title);
-    this->game_info->SetUpdateMultiplicity( 1 );
 
-    this->InitializeRenderer();
-    this->InitializeEntities();
-    this->assets.SetRenderer(this->renderer);
+Game::~Game() = default;
+	
+void Game::Init(){
+    Log::Init();
+    InitializeRenderer();
+    InitializeEntities();
+    assets.SetRenderer(renderer.get());
 }
 
 void Game::InitializeRenderer()
@@ -60,18 +45,18 @@ void Game::InitializeRenderer()
         return;
     }
     Uint32 sdl_flags = (
-        game_info->IsWindowResizable() ?
+        game_info->is_window_resizable ?
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE : SDL_WINDOW_SHOWN
-        );
-    window = SdlSharedPtr(
-        SDL_CreateWindow(
-            game_info->GetWindowTitle().c_str(),
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            game_info->GetWindowWidth(),
-            game_info->GetWindowHeight(),
-            sdl_flags
-        )
+    );
+    window = SdlMakeUniquePtr(
+            SDL_CreateWindow(
+                    game_info->window_title.c_str(),
+                    SDL_WINDOWPOS_CENTERED,
+                    SDL_WINDOWPOS_CENTERED,
+                    game_info->window_width,
+                    game_info->window_height,
+                    sdl_flags
+            )
     );
     if (!window)
     {
@@ -79,7 +64,7 @@ void Game::InitializeRenderer()
         SDL_Quit();
         return;
     }
-    renderer = SdlSharedPtr(
+    renderer = SdlMakeSharedPtr(
         //TODO: add vsync member to GameInfo. Rename GameInfo to GameSettings
         SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
     );
@@ -89,6 +74,7 @@ void Game::InitializeRenderer()
         SDL_Quit();
         return;
     }
+    SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
 }
 
 void Game::ProcessInput()
@@ -99,14 +85,14 @@ void Game::ProcessInput()
     {
         case SDL_QUIT:
         {
-            this->Quit();
+            Quit();
             break;
         }
         case SDL_KEYDOWN:
         {
             if (event.key.keysym.sym == SDLK_ESCAPE)
             {
-                this->Quit();
+                Quit();
             }
         }
         default:
@@ -129,8 +115,8 @@ void Game::Run()
         "SDL wasn't initialized. Missing call to `InitializeRenderer`."
     );
 
-    double update_rate = game_info->GetDesiredFps();
-    double update_multiplicity = game_info->GetUpdateMultiplicity();
+    double update_rate = game_info->desired_fps;
+    double update_multiplicity = game_info->update_multiplicity;
 
     // compute how many ticks one update should be
     DeltaTime fixed_delta_time = 1.0 / update_rate;
@@ -265,89 +251,80 @@ void Game::UpdateLogic( DeltaTime dt )
 {
     UpdateTransforms();
     //TODO: Handle physics
-    this->update_game_func( dt );
+    update_game_func( dt );
 }
 
 void Game::UpdateTransforms()
 {
-    // printf("\nUpdateLogic Start\n");
-    // Breadth first search transforms update:
-    entt::entity start = scene_root;
-    std::unordered_map<entt::entity, bool> visited;
-    visited[start] = true;
-    std::queue<entt::entity> queue;
-    queue.push(start);
-
-    while (!queue.empty())
-    {
-        entt::entity parent_entity = queue.front();
-        queue.pop();
-
-        const auto& parent_transform = world.get<TransformComponent>( parent_entity );
-        // printf("\nCurrent parent: %d\n", parent_entity );
-        ComponentUtils::ForEachDirectChild( world, parent_entity, [&]( entt::entity child ) {
-            auto it = visited.find( child );
-            bool was_visited = it != visited.end();
-            if ( !was_visited && this->world.valid( child ) )
-            {
-                visited[child] = true;
-                queue.push( child );
-
-                auto& transform = world.get<TransformComponent>(child);
-                transform.world_position.x = transform.position.x + parent_transform.world_position.x;
-                transform.world_position.y = transform.position.y + parent_transform.world_position.y;
-                // printf("Entity id: %d, position: %f, %f\n", child, transform.world_position.x, transform.world_position.y);
-                //rotation and scale are intentionally NOT being propagated to children here
-            }
-        });
-    }
-    // printf("UpdateLogic End\n");
+    ComponentUtils::ForEachInHierarchy( world, scene_root, [&]( entt::entity entity ) {
+        entt::entity parent{ world.get<RelationshipComponent>(entity).parent };
+        if (!world.valid( parent ) || !world.any_of<TransformComponent>(parent) || !world.any_of<TransformComponent>(entity))
+        {
+            return;
+        }
+        auto& parent_transform = world.get<TransformComponent>(parent);
+        auto& transform = world.get<TransformComponent>(entity);
+        transform.world_position.x = transform.position.x + parent_transform.world_position.x;
+        transform.world_position.y = transform.position.y + parent_transform.world_position.y;
+    });
 }
 
 void Game::Render()
 {
-    const Color& bg_color = game_info->GetBackgroundColor();
+    const Color& bg_color = game_info->bg_color;
     SDL_SetRenderDrawColor(renderer.get(), bg_color.R(), bg_color.G(), bg_color.B(), bg_color.A());
     SDL_RenderClear(renderer.get()); //clear back buffer
 
-    //TODO: think how can I define different layers
-
-    auto view = this->world.view<TextureComponent, TransformComponent>();
-    view.each([&](auto &texture, auto &transform) { RenderTexture(texture, transform); });
-
-//    this->world->query<TextureComponent, TransformComponent>().each(
-//        std::bind(&Game::RenderTexture, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
-//    );
-//    this->world->query<RectangleComponent, TransformComponent>().each(
-//        std::bind(&Game::RenderRectangle, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
-//    );
-//    this->world->query<LineComponent, TransformComponent>().each(
-//        std::bind(&Game::RenderLine, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
-//    );
-
-    //swap front and back buffers:
-    SDL_RenderPresent(this->renderer.get());
+    ComponentUtils::ForEachInHierarchy( world, scene_root, [&]( entt::entity entity )
+    {
+        if ( world.all_of<TransformComponent, TextureComponent>(entity) )
+        {
+            RenderTexture(world.get<TextureComponent>(entity), world.get<TransformComponent>(entity));
+        }
+        if ( world.all_of<TransformComponent, RectangleComponent>(entity) )
+        {
+            RenderRectangle(world.get<RectangleComponent>(entity), world.get<TransformComponent>(entity));
+        }
+        if ( world.all_of<TransformComponent, LineComponent>(entity) )
+        {
+            RenderLine(world.get<LineComponent>(entity), world.get<TransformComponent>(entity));
+        }
+    });
+    SDL_RenderPresent(renderer.get()); //swap front and back buffers:
 }
 
 void Game::RenderTexture(
-    TextureComponent &texture_component, const TransformComponent &transform_component)
+    const TextureComponent &texture_component, const TransformComponent &transform_component)
 {
-    auto sdl_texture = texture_component.texture;
+    SDL_Texture* sdl_texture = texture_component.texture.get();
     if (!sdl_texture || (!texture_component.is_visible))
     {
         return;
     }
-    int w, h;
-    SDL_QueryTexture(sdl_texture.get(), nullptr, nullptr, &w, &h);
     SDL_FRect dest;
-    dest.w = transform_component.scale.x * (float) w;
-    dest.h = transform_component.scale.y * (float) h;
-    dest.x = transform_component.world_position.x;
-    dest.y = transform_component.world_position.y;
+    switch (game_info->rendering_mode)
+    {
+        case RenderingMode::PixelPerfect:
+        {
+            dest.w = Math::Round(transform_component.scale.x * (float) texture_component.width);
+            dest.h = Math::Round(transform_component.scale.y * (float) texture_component.height);
+            dest.x = Math::Round(transform_component.world_position.x);
+            dest.y = Math::Round(transform_component.world_position.y);
+            break;
+        }
+        case RenderingMode::Default:
+        {
+            dest.w = transform_component.scale.x * (float) texture_component.width;
+            dest.h = transform_component.scale.y * (float) texture_component.height;
+            dest.x = transform_component.world_position.x;
+            dest.y = transform_component.world_position.y;
+            break;
+        }
+    }
     //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
     SDL_RenderCopyExF(
-            this->renderer.get(),
-            sdl_texture.get(),
+            renderer.get(),
+            sdl_texture,
             nullptr,
             &dest,
             transform_component.rotation,
@@ -363,28 +340,29 @@ void Game::RenderRectangle(RectangleComponent& rect_component, const TransformCo
         return;
     }
     SDL_SetRenderDrawColor(
-        this->renderer.get(),
+        renderer.get(),
         rect_component.color.R(),
         rect_component.color.G(),
         rect_component.color.B(),
         rect_component.color.A()
     );
-//TODO check how to handle hierarchies:
-// https://github.com/SanderMertens/flecs/blob/master/examples/cpp/08_hierarchy/src/main.cpp
-//    const Math::Vector2& position = e.has<TransformComponent>() ? e.get<TransformComponent>()->position : Math::Vector2();
-//    float x = rect_component.x + position.x;
-//    float y = rect_component.y + position.y;
-    SDL_FRect rect{rect_component.x, rect_component.y, rect_component.width, rect_component.height};
+
+    SDL_FRect rect{
+        rect_component.x + transform_component.world_position.x,
+        rect_component.y + transform_component.world_position.y,
+        rect_component.width * transform_component.scale.x,
+        rect_component.height * transform_component.scale.y
+    };
     if (rect_component.is_filled)
     {
         //TODO: SDL_RenderFillRectsF apparently supports batching, so that is something to consider here
-        SDL_RenderFillRectF(this->renderer.get(), &rect);
+        SDL_RenderFillRectF(renderer.get(), &rect);
     }
     else
     {
         //SDL_RenderDrawRectsF just does N calls to SDL_RenderDrawRectF, so no need to worry into changing to
         // SDL_RenderDrawRectsF here
-        SDL_RenderDrawRectF(this->renderer.get(), &rect);
+        SDL_RenderDrawRectF(renderer.get(), &rect);
     }
 }
 
@@ -395,7 +373,7 @@ void Game::RenderLine(LineComponent& line_component, const TransformComponent &t
         return;
     }
     SDL_SetRenderDrawColor(
-        this->renderer.get(),
+        renderer.get(),
         line_component.color.R(),
         line_component.color.G(),
         line_component.color.B(),
@@ -403,30 +381,34 @@ void Game::RenderLine(LineComponent& line_component, const TransformComponent &t
     );
     //TODO: SDL_RenderDrawLinesF apparently supports batching, so that's something to consider here
     SDL_RenderDrawLineF(
-        this->renderer.get(), line_component.p1.x, line_component.p1.y, line_component.p2.x, line_component.p2.y
+        renderer.get(),
+        transform_component.world_position.x + line_component.p1.x, //TODO apply scale and rotation
+        transform_component.world_position.y + line_component.p1.y,
+        transform_component.world_position.x + line_component.p2.x,
+        transform_component.world_position.y + line_component.p2.y
     );
 }
 
 void Game::Quit()
 {
-    this->is_running = false;
+    is_running = false;
 }
 
 entt::registry& Game::GetWorld()
 {
-    return this->world;
+    return world;
 }
 
 entt::entity Game::GetSceneRoot()
 {
-    return this->scene_root;
+    return scene_root;
 }
 
 void Game::InitializeEntities()
 {
-    this->scene_root = this->world.create();
-    auto& transform = this->world.emplace<TransformComponent>( scene_root );
-    this->world.emplace<RelationshipComponent>( scene_root );
+    scene_root = world.create();
+    auto& transform = world.emplace<TransformComponent>( scene_root );
+    world.emplace<RelationshipComponent>( scene_root );
 }
 
 void Game::SetUpdateGameFunction( GameUpdateFunction update_game_func )
