@@ -60,7 +60,7 @@ private:
 
     void UpdateTransforms();
     void RenderTexture(
-        TextureComponent& texture_component, const TransformComponent& transform_component
+        const TextureComponent& texture_component, const TransformComponent& transform_component
     );
     void RenderRectangle(RectangleComponent& rect_component, const TransformComponent &transform_component);
     void RenderLine(LineComponent& line_component, const TransformComponent &transform_component);

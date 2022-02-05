@@ -74,6 +74,7 @@ void Game::InitializeRenderer()
         SDL_Quit();
         return;
     }
+    SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
 }
 
 void Game::ProcessInput()
@@ -255,38 +256,17 @@ void Game::UpdateLogic( DeltaTime dt )
 
 void Game::UpdateTransforms()
 {
-    // printf("\nUpdateLogic Start\n");
-    // Breadth first search transforms update:
-    entt::entity start = scene_root;
-    std::unordered_map<entt::entity, bool> visited;
-    visited[start] = true;
-    std::queue<entt::entity> queue;
-    queue.push(start);
-
-    while (!queue.empty())
-    {
-        entt::entity parent_entity = queue.front();
-        queue.pop();
-
-        const auto& parent_transform = world.get<TransformComponent>( parent_entity );
-        // printf("\nCurrent parent: %d\n", parent_entity );
-        ComponentUtils::ForEachDirectChild( world, parent_entity, [&]( entt::entity child ) {
-            auto it = visited.find( child );
-            bool was_visited = it != visited.end();
-            if ( !was_visited && world.valid( child ) )
-            {
-                visited[child] = true;
-                queue.push( child );
-
-                auto& transform = world.get<TransformComponent>(child);
-                transform.world_position.x = transform.position.x + parent_transform.world_position.x;
-                transform.world_position.y = transform.position.y + parent_transform.world_position.y;
-                // printf("Entity id: %d, position: %f, %f\n", child, transform.world_position.x, transform.world_position.y);
-                //rotation and scale are intentionally NOT being propagated to children here
-            }
-        });
-    }
-    // printf("UpdateLogic End\n");
+    ComponentUtils::ForEachInHierarchy( world, scene_root, [&]( entt::entity entity ) {
+        entt::entity parent{ world.get<RelationshipComponent>(entity).parent };
+        if (!world.valid( parent ) || !world.any_of<TransformComponent>(parent) || !world.any_of<TransformComponent>(entity))
+        {
+            return;
+        }
+        auto& parent_transform = world.get<TransformComponent>(parent);
+        auto& transform = world.get<TransformComponent>(entity);
+        transform.world_position.x = transform.position.x + parent_transform.world_position.x;
+        transform.world_position.y = transform.position.y + parent_transform.world_position.y;
+    });
 }
 
 void Game::Render()
@@ -295,25 +275,26 @@ void Game::Render()
     SDL_SetRenderDrawColor(renderer.get(), bg_color.R(), bg_color.G(), bg_color.B(), bg_color.A());
     SDL_RenderClear(renderer.get()); //clear back buffer
 
-    auto view = world.view<TextureComponent, TransformComponent>();
-    view.each([&](auto &texture, auto &transform) { RenderTexture(texture, transform); });
-
-//    this->world->query<TextureComponent, TransformComponent>().each(
-//        std::bind(&Game::RenderTexture, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
-//    );
-//    this->world->query<RectangleComponent, TransformComponent>().each(
-//        std::bind(&Game::RenderRectangle, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
-//    );
-//    this->world->query<LineComponent, TransformComponent>().each(
-//        std::bind(&Game::RenderLine, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
-//    );
-
-    //swap front and back buffers:
-    SDL_RenderPresent(renderer.get());
+    ComponentUtils::ForEachInHierarchy( world, scene_root, [&]( entt::entity entity )
+    {
+        if ( world.all_of<TransformComponent, TextureComponent>(entity) )
+        {
+            RenderTexture(world.get<TextureComponent>(entity), world.get<TransformComponent>(entity));
+        }
+        if ( world.all_of<TransformComponent, RectangleComponent>(entity) )
+        {
+            RenderRectangle(world.get<RectangleComponent>(entity), world.get<TransformComponent>(entity));
+        }
+        if ( world.all_of<TransformComponent, LineComponent>(entity) )
+        {
+            RenderLine(world.get<LineComponent>(entity), world.get<TransformComponent>(entity));
+        }
+    });
+    SDL_RenderPresent(renderer.get()); //swap front and back buffers:
 }
 
 void Game::RenderTexture(
-    TextureComponent &texture_component, const TransformComponent &transform_component)
+    const TextureComponent &texture_component, const TransformComponent &transform_component)
 {
     SDL_Texture* sdl_texture = texture_component.texture.get();
     if (!sdl_texture || (!texture_component.is_visible))
@@ -365,12 +346,13 @@ void Game::RenderRectangle(RectangleComponent& rect_component, const TransformCo
         rect_component.color.B(),
         rect_component.color.A()
     );
-//TODO check how to handle hierarchies:
-// https://github.com/SanderMertens/flecs/blob/master/examples/cpp/08_hierarchy/src/main.cpp
-//    const Math::Vector2& position = e.has<TransformComponent>() ? e.get<TransformComponent>()->position : Math::Vector2();
-//    float x = rect_component.x + position.x;
-//    float y = rect_component.y + position.y;
-    SDL_FRect rect{rect_component.x, rect_component.y, rect_component.width, rect_component.height};
+
+    SDL_FRect rect{
+        rect_component.x + transform_component.world_position.x,
+        rect_component.y + transform_component.world_position.y,
+        rect_component.width * transform_component.scale.x,
+        rect_component.height * transform_component.scale.y
+    };
     if (rect_component.is_filled)
     {
         //TODO: SDL_RenderFillRectsF apparently supports batching, so that is something to consider here
@@ -399,7 +381,11 @@ void Game::RenderLine(LineComponent& line_component, const TransformComponent &t
     );
     //TODO: SDL_RenderDrawLinesF apparently supports batching, so that's something to consider here
     SDL_RenderDrawLineF(
-        renderer.get(), line_component.p1.x, line_component.p1.y, line_component.p2.x, line_component.p2.y
+        renderer.get(),
+        transform_component.world_position.x + line_component.p1.x, //TODO apply scale and rotation
+        transform_component.world_position.y + line_component.p1.y,
+        transform_component.world_position.x + line_component.p2.x,
+        transform_component.world_position.y + line_component.p2.y
     );
 }
 

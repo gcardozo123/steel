@@ -32,7 +32,6 @@ TEST_CASE( "test_game", "[test_game]" )
     std::string filename = "game_assets/ghost1.png";
     entt::entity ghost = ComponentUtils::AddChild( world, game.GetSceneRoot() );
     TextureComponent& ghost_texture = world.emplace<TextureComponent>(ghost, game.GetAssets().LoadTexture(filename));
-    //ghost_texture.is_visible = false;
     world.emplace<VelocityComponent>(ghost, Math::Vector2(1.0f, 1.0f), 10.0f);
 
     auto& transform = world.get<TransformComponent>(ghost);
@@ -63,6 +62,10 @@ TEST_CASE( "test_game", "[test_game]" )
     child2_child_transform.scale.Set (0.5f, 0.5f);
     child2_child_transform.position.x = 64.0f * 3.0f;
     child2_child_transform.position.y = 32.0f;
+
+    entt::entity line = ComponentUtils::AddChild( world, child2_child );
+    world.emplace<LineComponent>(line, Math::Vector2(1.0f, 1.0f), Math::Vector2(35.0f, 35.0f), Color(0.f, 0.f, 255.f, 255.f));
+    world.emplace<RectangleComponent>(line, 0, 0, 50, 50, Color(255.f, 0.f, 255.f, 125.f), true);
 
     float angle = 0.0f;
     game.SetUpdateGameFunction( [&]( Steel::DeltaTime dt ) {
