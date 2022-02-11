@@ -13,6 +13,7 @@ namespace Steel
     static void SdlDeleteResource(SDL_Renderer *r) { SDL_DestroyRenderer(r); }
     static void SdlDeleteResource(SDL_Texture  *r) { SDL_DestroyTexture(r); }
     static void SdlDeleteResource(SDL_Surface  *r) { SDL_FreeSurface(r); }
+    static void SdlDeleteResource(TTF_Font  *r) { TTF_CloseFont(r); }
 
     template <typename T>
     struct SdlResourceDeleter
