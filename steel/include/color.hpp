@@ -1,6 +1,5 @@
 #pragma once
 
-#include "vector4.hpp"
 #include "steel_math.hpp"
 
 namespace Steel

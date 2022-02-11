@@ -42,7 +42,6 @@ set(HEADER_LIST
 	"${STEEL_INCLUDE_DIR}steel.hpp"
 	"${STEEL_INCLUDE_DIR}steel_math.hpp"
 	"${STEEL_INCLUDE_DIR}vector2.hpp"
-	"${STEEL_INCLUDE_DIR}vector4.hpp"
 	"${STEEL_INCLUDE_DIR}steel_sdl.hpp"
 	"${ENTT_DIR}entt.hpp"
 )
