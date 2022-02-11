@@ -28,6 +28,12 @@ TEST_CASE( "test_game", "[test_game]" )
 
     auto& world = game.GetWorld();
 
+    std::string font_path = "../game_assets/sans.ttf";
+    entt::entity text_entity = ComponentUtils::AddChild( world, game.GetSceneRoot() );
+    TextureComponent& text_component = world.emplace<TextureComponent>(
+        text_entity, game.GetAssets().GetText(font_path, 48, "Such a game", Color{255, 0, 0, 125})
+    );
+
     // Create entities:
     std::string filename = "game_assets/ghost1.png";
     entt::entity ghost = ComponentUtils::AddChild( world, game.GetSceneRoot() );
@@ -64,8 +70,8 @@ TEST_CASE( "test_game", "[test_game]" )
     child2_child_transform.position.y = 32.0f;
 
     entt::entity line = ComponentUtils::AddChild( world, child2_child );
-    world.emplace<LineComponent>(line, Math::Vector2(1.0f, 1.0f), Math::Vector2(35.0f, 35.0f), Color(0.f, 0.f, 255.f, 255.f));
-    world.emplace<RectangleComponent>(line, 0, 0, 50, 50, Color(255.f, 0.f, 255.f, 125.f), true);
+    world.emplace<LineComponent>(line, Math::Vector2(1.0f, 1.0f), Math::Vector2(35.0f, 35.0f), Color(0, 0, 255, 255));
+    world.emplace<RectangleComponent>(line, 0.f, 0.f, 50.f, 50.f, Color(255, 0, 255, 125), true);
 
     float angle = 0.0f;
     game.SetUpdateGameFunction( [&]( Steel::DeltaTime dt ) {

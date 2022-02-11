@@ -3,6 +3,7 @@
 #include <string>
 
 #include <entt.hpp>
+#include <utility>
 
 #include "vector2.hpp"
 #include "steel_sdl.hpp"
@@ -65,10 +66,7 @@ struct TextureComponent
     TextureComponent(const TextureComponent& ) = delete;
     TextureComponent& operator=(const TextureComponent& ) = delete;
 
-    TextureComponent(TextureComponent &&other) noexcept
-    {
-        *this = std::move(other);
-    }
+    TextureComponent(TextureComponent &&other) noexcept { *this = std::move(other); }
     TextureComponent& operator=(TextureComponent &&other) noexcept
     {
         texture = std::move(other.texture);
@@ -80,7 +78,6 @@ struct TextureComponent
         other.is_visible = false;
         return *this;
     }
-
 };
 
 struct LineComponent

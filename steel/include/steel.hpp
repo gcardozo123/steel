@@ -14,7 +14,6 @@
 #include "steel_sdl.hpp"
 #include "steel_math.hpp"
 #include "vector2.hpp"
-#include "vector4.hpp"
 
 //third party
 #include <entt.hpp>

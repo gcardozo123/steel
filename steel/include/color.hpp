@@ -1,6 +1,5 @@
 #pragma once
 
-#include "vector4.hpp"
 #include "steel_math.hpp"
 
 namespace Steel
@@ -10,15 +9,11 @@ class Color
 public:
     Color() = default;
     ~Color() = default;
-    ///RGBA values should be between [0, 255]
-    Color(float r, float g, float b, float a)
+    ///RGBA values between [0, 255]
+    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
         :
-        color(
-            Math::Clamp(r, 0.f, 255.f),
-            Math::Clamp(g, 0.f, 255.f),
-            Math::Clamp(b, 0.f, 255.f),
-            Math::Clamp(a, 0.f, 255.f)
-        ){}
+        color(SDL_Color {r, g, b, a} )
+    {}
     Color& operator=(const Color& c)
     {
         color.r = c.R();
@@ -28,25 +23,27 @@ public:
         return *this;
     }
 
-    float R() const { return color.r; }
-    float G() const { return color.g; }
-    float B() const { return color.b; }
-    float A() const { return color.a; }
+    uint8_t R() const { return color.r; }
+    uint8_t G() const { return color.g; }
+    uint8_t B() const { return color.b; }
+    uint8_t A() const { return color.a; }
 
-    void Set(float r, float g, float b, float a)
+    void Set(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
     {
-        color.r = Math::Clamp(r, 0.f, 255.f);
-        color.g = Math::Clamp(g, 0.f, 255.f);
-        color.b = Math::Clamp(b, 0.f, 255.f);
-        color.a = Math::Clamp(a, 0.f, 255.f);
+        color.r = r;
+        color.g = g;
+        color.b = b;
+        color.a = a;
     }
-    void SetR(float r) { color.r = Math::Clamp(r, 0.f, 255.f); }
-    void SetG(float g) { color.g = Math::Clamp(g, 0.f, 255.f); }
-    void SetB(float b) { color.b = Math::Clamp(b, 0.f, 255.f); }
-    void SetA(float a) { color.a = Math::Clamp(a, 0.f, 255.f); }
+    void SetR(uint8_t r) { color.r = r; }
+    void SetG(uint8_t g) { color.g = g; }
+    void SetB(uint8_t b) { color.b = b; }
+    void SetA(uint8_t a) { color.a = a; }
+
+    SDL_Color ToSdl() const { return SDL_Color {color.r, color.g, color.b, color.a}; }
 
 private:
-    Math::Vector4 color;
+    SDL_Color color;
 }; //Color
 
 } //Steel
