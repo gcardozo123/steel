@@ -290,7 +290,7 @@ void Game::Render()
             RenderLine(world.get<LineComponent>(entity), world.get<TransformComponent>(entity));
         }
     });
-    SDL_RenderPresent(renderer.get()); //swap front and back buffers:
+    SDL_RenderPresent(renderer.get()); //swap front and back buffers
 }
 
 void Game::RenderTexture(
@@ -301,39 +301,48 @@ void Game::RenderTexture(
     {
         return;
     }
-    SDL_FRect dest;
     switch (game_info->rendering_mode)
     {
         case RenderingMode::PixelPerfect:
         {
+            SDL_Rect dest;
             dest.w = Math::Round(transform_component.scale.x * (float) texture_component.width);
             dest.h = Math::Round(transform_component.scale.y * (float) texture_component.height);
             dest.x = Math::Round(transform_component.world_position.x);
             dest.y = Math::Round(transform_component.world_position.y);
+            SDL_RenderCopyEx(
+                renderer.get(),
+                sdl_texture,
+                nullptr,
+                &dest,
+                transform_component.rotation,
+                nullptr,
+                SDL_RendererFlip::SDL_FLIP_NONE
+            );
             break;
         }
         case RenderingMode::Default:
         {
+            SDL_FRect dest;
             dest.w = transform_component.scale.x * (float) texture_component.width;
             dest.h = transform_component.scale.y * (float) texture_component.height;
             dest.x = transform_component.world_position.x;
             dest.y = transform_component.world_position.y;
+            SDL_RenderCopyExF(
+                renderer.get(),
+                sdl_texture,
+                nullptr,
+                &dest,
+                transform_component.rotation,
+                nullptr,
+                SDL_RendererFlip::SDL_FLIP_NONE
+            );
             break;
         }
     }
-    //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
-    SDL_RenderCopyExF(
-            renderer.get(),
-            sdl_texture,
-            nullptr,
-            &dest,
-            transform_component.rotation,
-            nullptr,
-            SDL_RendererFlip::SDL_FLIP_NONE
-    );
 }
 
-void Game::RenderRectangle(RectangleComponent& rect_component, const TransformComponent &transform_component)
+void Game::RenderRectangle(const RectangleComponent& rect_component, const TransformComponent &transform_component)
 {
     if (!rect_component.is_visible)
     {
@@ -366,7 +375,7 @@ void Game::RenderRectangle(RectangleComponent& rect_component, const TransformCo
     }
 }
 
-void Game::RenderLine(LineComponent& line_component, const TransformComponent &transform_component)
+void Game::RenderLine(const LineComponent& line_component, const TransformComponent &transform_component)
 {
     if (!line_component.is_visible)
     {
