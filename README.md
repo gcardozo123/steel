@@ -1,6 +1,7 @@
 # steel
 
-Hopefully this will become a 2D game framework, but for now it's just a hobby project I'm using to explore CMake, SDL2 and Catch2.
+2d game framework **pet project** using C++17, SDL2, Entt and Catch2. Definitely not ready for serious
+usage.
 
 
 # Inspiration
