@@ -23,6 +23,9 @@ TEST_CASE( "test_game", "[test_game]" )
 {
     GameInfo game_info{};
     game_info.window_title = "Potato Game!";
+    game_info.window_width = 960;
+    game_info.window_height = 540;
+    game_info.is_window_resizable = true;
     Game game( &game_info );
     game.Init();
 

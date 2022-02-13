@@ -39,6 +39,18 @@ public:
     Assets& GetAssets() { return assets; }
 
 private:
+    void InitializeRenderer();
+    void InitializeEntities();
+    void ProcessInput();
+    void UpdateLogic(DeltaTime dt);
+    void Render();
+
+    void UpdateTransforms();
+    void RenderTexture(const TextureComponent& texture_component, const TransformComponent& transform_component);
+    void RenderRectangle(const RectangleComponent& rect_component, const TransformComponent &transform_component);
+    void RenderLine(const LineComponent& line_component, const TransformComponent &transform_component);
+
+private:
     entt::registry world;
     entt::entity scene_root;
 
@@ -51,19 +63,6 @@ private:
     Assets assets;
 
     GameUpdateFunction update_game_func;
-
-    void InitializeRenderer();
-    void InitializeEntities();
-    void ProcessInput();
-    void UpdateLogic(DeltaTime dt);
-    void Render();
-
-    void UpdateTransforms();
-    void RenderTexture(
-        const TextureComponent& texture_component, const TransformComponent& transform_component
-    );
-    void RenderRectangle(RectangleComponent& rect_component, const TransformComponent &transform_component);
-    void RenderLine(LineComponent& line_component, const TransformComponent &transform_component);
 };
 
 }

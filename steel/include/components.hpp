@@ -104,10 +104,10 @@ struct LineComponent
 
 struct RectangleComponent
 {
-    float x;
-    float y;
-    float width;
-    float height;
+    int x;
+    int y;
+    int width;
+    int height;
     Color color; // defaults to green
     bool is_filled; //if `true` renders a filled rectangle
     bool is_visible; // defaults to `true`

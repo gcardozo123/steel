@@ -1,6 +1,3 @@
-#include <queue>
-#include <unordered_map>
-
 #include "game.hpp"
 #include "game_info.hpp"
 #include "components.hpp"
@@ -32,6 +29,9 @@ void Game::Init(){
 
 void Game::InitializeRenderer()
 {
+    STEEL_CORE_ASSERT(
+        game_info->rendering_mode == RenderingMode::PixelPerfect, "Only 'PixelPerfect' rendering is supported for now"
+    );
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         STEEL_CORE_ASSERT(false, "Error initializing SDL.");
@@ -64,10 +64,9 @@ void Game::InitializeRenderer()
         SDL_Quit();
         return;
     }
-    renderer = SdlMakeSharedPtr(
-        //TODO: add vsync member to GameInfo. Rename GameInfo to GameSettings
-        SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
-    );
+    renderer = SdlMakeSharedPtr( SDL_CreateRenderer(
+        window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+    ));
     if (!renderer)
     {
         STEEL_CORE_ASSERT(false, "Error creating SDL renderer.");
@@ -75,6 +74,7 @@ void Game::InitializeRenderer()
         return;
     }
     SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
+    SDL_RenderSetLogicalSize(renderer.get(), game_info->window_width, game_info->window_height ); // keep game aspect ratio
 }
 
 void Game::ProcessInput()
@@ -272,8 +272,9 @@ void Game::UpdateTransforms()
 void Game::Render()
 {
     const Color& bg_color = game_info->bg_color;
-    SDL_SetRenderDrawColor(renderer.get(), bg_color.R(), bg_color.G(), bg_color.B(), bg_color.A());
-    SDL_RenderClear(renderer.get()); //clear back buffer
+    SDL_Renderer* sdl_renderer = renderer.get();
+    SDL_SetRenderDrawColor(sdl_renderer, bg_color.R(), bg_color.G(), bg_color.B(), bg_color.A());
+    SDL_RenderClear( sdl_renderer ); //clear back buffer
 
     ComponentUtils::ForEachInHierarchy( world, scene_root, [&]( entt::entity entity )
     {
@@ -290,7 +291,7 @@ void Game::Render()
             RenderLine(world.get<LineComponent>(entity), world.get<TransformComponent>(entity));
         }
     });
-    SDL_RenderPresent(renderer.get()); //swap front and back buffers:
+    SDL_RenderPresent( sdl_renderer ); //swap front and back buffers
 }
 
 void Game::RenderTexture(
@@ -301,39 +302,23 @@ void Game::RenderTexture(
     {
         return;
     }
-    SDL_FRect dest;
-    switch (game_info->rendering_mode)
-    {
-        case RenderingMode::PixelPerfect:
-        {
-            dest.w = Math::Round(transform_component.scale.x * (float) texture_component.width);
-            dest.h = Math::Round(transform_component.scale.y * (float) texture_component.height);
-            dest.x = Math::Round(transform_component.world_position.x);
-            dest.y = Math::Round(transform_component.world_position.y);
-            break;
-        }
-        case RenderingMode::Default:
-        {
-            dest.w = transform_component.scale.x * (float) texture_component.width;
-            dest.h = transform_component.scale.y * (float) texture_component.height;
-            dest.x = transform_component.world_position.x;
-            dest.y = transform_component.world_position.y;
-            break;
-        }
-    }
-    //TODO decide between SDL_RenderCopy and SDL_RenderCopyF (consider pixel perfect movement)
-    SDL_RenderCopyExF(
-            renderer.get(),
-            sdl_texture,
-            nullptr,
-            &dest,
-            transform_component.rotation,
-            nullptr,
-            SDL_RendererFlip::SDL_FLIP_NONE
+    SDL_Rect dest;
+    dest.w = Math::Round(transform_component.scale.x * (float) texture_component.width);
+    dest.h = Math::Round(transform_component.scale.y * (float) texture_component.height);
+    dest.x = Math::Round(transform_component.world_position.x);
+    dest.y = Math::Round(transform_component.world_position.y);
+    SDL_RenderCopyEx(
+        renderer.get(),
+        sdl_texture,
+        nullptr,
+        &dest,
+        transform_component.rotation,
+        nullptr,
+        SDL_RendererFlip::SDL_FLIP_NONE
     );
 }
 
-void Game::RenderRectangle(RectangleComponent& rect_component, const TransformComponent &transform_component)
+void Game::RenderRectangle(const RectangleComponent& rect_component, const TransformComponent &transform_component)
 {
     if (!rect_component.is_visible)
     {
@@ -346,27 +331,23 @@ void Game::RenderRectangle(RectangleComponent& rect_component, const TransformCo
         rect_component.color.B(),
         rect_component.color.A()
     );
-
-    SDL_FRect rect{
-        rect_component.x + transform_component.world_position.x,
-        rect_component.y + transform_component.world_position.y,
-        rect_component.width * transform_component.scale.x,
-        rect_component.height * transform_component.scale.y
+    SDL_Rect rect{
+        rect_component.x + (int) transform_component.world_position.x,
+        rect_component.y + (int) transform_component.world_position.y,
+        (int) (rect_component.width * transform_component.scale.x),
+        (int) (rect_component.height * transform_component.scale.y)
     };
     if (rect_component.is_filled)
     {
-        //TODO: SDL_RenderFillRectsF apparently supports batching, so that is something to consider here
-        SDL_RenderFillRectF(renderer.get(), &rect);
+        SDL_RenderFillRect(renderer.get(), &rect);
     }
     else
     {
-        //SDL_RenderDrawRectsF just does N calls to SDL_RenderDrawRectF, so no need to worry into changing to
-        // SDL_RenderDrawRectsF here
-        SDL_RenderDrawRectF(renderer.get(), &rect);
+        SDL_RenderDrawRect(renderer.get(), &rect);
     }
 }
 
-void Game::RenderLine(LineComponent& line_component, const TransformComponent &transform_component)
+void Game::RenderLine(const LineComponent& line_component, const TransformComponent &transform_component)
 {
     if (!line_component.is_visible)
     {
@@ -379,8 +360,7 @@ void Game::RenderLine(LineComponent& line_component, const TransformComponent &t
         line_component.color.B(),
         line_component.color.A()
     );
-    //TODO: SDL_RenderDrawLinesF apparently supports batching, so that's something to consider here
-    SDL_RenderDrawLineF(
+    SDL_RenderDrawLine(
         renderer.get(),
         transform_component.world_position.x + line_component.p1.x, //TODO apply scale and rotation
         transform_component.world_position.y + line_component.p1.y,
