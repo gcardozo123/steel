@@ -79,5 +79,7 @@ inline float WrapAngle(float angle)
 // Determines if value is powered by two.
 inline bool IsPowerOfTwo(int value) { return (value > 0) && ((value & (value - 1)) == 0); }
 
+inline bool IsAlmostEqual( float a, float b, float precision = 0.0001f ) { return abs( a - b ) <= precision; }
+
 } //Math
 } //Steel
