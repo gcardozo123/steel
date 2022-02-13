@@ -15,7 +15,6 @@ Game::Game(const GameInfo* game_info)
     game_info(game_info),
     window(nullptr),
     renderer(nullptr),
-    scene_texture(nullptr),
     update_game_func( []( Steel::DeltaTime ) {} )
 {}
 
@@ -66,7 +65,7 @@ void Game::InitializeRenderer()
         return;
     }
     renderer = SdlMakeSharedPtr( SDL_CreateRenderer(
-        window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE
+        window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
     ));
     if (!renderer)
     {
@@ -75,6 +74,7 @@ void Game::InitializeRenderer()
         return;
     }
     SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
+    SDL_RenderSetLogicalSize(renderer.get(), game_info->window_width, game_info->window_height ); // keep game aspect ratio
 }
 
 void Game::ProcessInput()
@@ -276,15 +276,6 @@ void Game::Render()
     SDL_SetRenderDrawColor(sdl_renderer, bg_color.R(), bg_color.G(), bg_color.B(), bg_color.A());
     SDL_RenderClear( sdl_renderer ); //clear back buffer
 
-    scene_texture = SdlMakeUniquePtr( SDL_CreateTexture(
-        sdl_renderer,
-        SDL_PIXELFORMAT_RGBA8888,
-        SDL_TEXTUREACCESS_TARGET,
-        game_info->window_width,
-        game_info->window_height
-    ));
-    SDL_SetRenderTarget( sdl_renderer, scene_texture.get()); // render entities into scene_texture
-
     ComponentUtils::ForEachInHierarchy( world, scene_root, [&]( entt::entity entity )
     {
         if ( world.all_of<TransformComponent, TextureComponent>(entity) )
@@ -300,17 +291,6 @@ void Game::Render()
             RenderLine(world.get<LineComponent>(entity), world.get<TransformComponent>(entity));
         }
     });
-    SDL_SetRenderTarget( sdl_renderer, nullptr); // render scene_texture into window
-    SDL_RenderSetLogicalSize( sdl_renderer, game_info->window_width, game_info->window_height ); // keep game aspect ratio
-    SDL_RenderCopyEx(
-        sdl_renderer,
-        scene_texture.get(),
-        nullptr,
-        nullptr,
-        0,
-        nullptr,
-        SDL_RendererFlip::SDL_FLIP_NONE
-    );
     SDL_RenderPresent( sdl_renderer ); //swap front and back buffers
 }
 

@@ -59,9 +59,6 @@ private:
 
     SdlUniquePtr<SDL_Window> window;
     SharedPtr<SDL_Renderer> renderer;
-    // Used for pixel-perfect rendering, so small resolution games can be stretched to the window.
-    // The whole scene is draw into this texture.
-    SdlUniquePtr<SDL_Texture> scene_texture;
 
     Assets assets;
 
